@@ -91,9 +91,9 @@ namespace Nodix {
 
             cloudSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            IPEndPoint endPoint = new IPEndPoint(cloudAddress, cloudPort);
+            cloudEndPoint = new IPEndPoint(cloudAddress, cloudPort);
             try {
-                cloudSocket.Connect(endPoint);
+                cloudSocket.Connect(cloudEndPoint);
                 isConnectedToCloud = true;
                 receiveThread = new Thread(this.receiver);
                 receiveThread.Start();
@@ -118,6 +118,24 @@ namespace Nodix {
             else {
                 log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading manager Port" + " \n");
             }
+
+            managerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            managerEndPoint = new IPEndPoint(managerAddress, managerPort);
+            try {
+                managerSocket.Connect(managerEndPoint);
+                isConnectedToManager = true;
+
+                //działanie AGENTA
+
+
+            }
+            catch (SocketException ex) {
+                isConnectedToManager = false;
+                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to manager\n");
+                log.AppendText("Wrong IP or port?\n");
+            }
+            
         }
 
         private void receiver() {
@@ -225,6 +243,10 @@ namespace Nodix {
                 VCArray.Remove(key);
             }
             else SetText("Nie ma takiego klucza\n");
+        }
+
+        public void clearTable() {
+            VCArray = new Dictionary<VPIVCI, VPIVCI>(new VPIVCIComparer());
         }
     }
 }
