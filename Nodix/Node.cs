@@ -189,5 +189,42 @@ namespace Nodix {
                 }
             }
         }
+
+        public void addEntry(VPIVCI key, VPIVCI value) {
+            if (VCArray.ContainsKey(key)) {
+                SetText("Zmieniam stary klucz VCArray\n");
+                VCArray.Remove(key);
+                VCArray.Add(key, value);
+            }
+            else VCArray.Add(key, value);
+        }
+
+        public void addEntry(int keyVPI, int keyVCI, int valueVPI, int valueVCI) {
+            VPIVCI key = new VPIVCI(keyVPI, keyVCI);
+            VPIVCI value = new VPIVCI(keyVPI, keyVCI);
+            if (VCArray.ContainsKey(key)) {
+                SetText("Zmieniam stary klucz VCArray\n");
+                VCArray.Remove(key);
+                VCArray.Add(key, value);
+            }
+            else VCArray.Add(key, value);
+        }
+
+        public void removeEntry(VPIVCI key) {
+            if (VCArray.ContainsKey(key)) {
+                SetText("Usuwam klucz w VCArray\n");
+                VCArray.Remove(key);
+            }
+            else SetText("Nie ma takiego klucza\n");
+        }
+
+        public void removeEntry(int keyVPI, int keyVCI) {
+            VPIVCI key = new VPIVCI(keyVPI, keyVCI);
+            if (VCArray.ContainsKey(key)) {
+                SetText("Usuwam klucz w VCArray\n");
+                VCArray.Remove(key);
+            }
+            else SetText("Nie ma takiego klucza\n");
+        }
     }
 }
