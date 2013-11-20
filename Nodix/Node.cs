@@ -59,21 +59,14 @@ namespace Nodix {
         //jego zasięgiem
 
         //
-        private Dictionary<VPIVCI, VPIVCI> VCArray = new Dictionary<VPIVCI,VPIVCI>(new VPIVCIComparer());
+        private Dictionary<PortVPIVCI, PortVPIVCI> VCArray = new Dictionary<PortVPIVCI,PortVPIVCI>(new PortVPIVCIComparer());
 
         public Nodix() {
             InitializeComponent();
-            VPIVCI k = new VPIVCI(1, 1);
-            VPIVCI v = new VPIVCI(2, 2);
+            PortVPIVCI k = new PortVPIVCI(1, 1, 1);
+            PortVPIVCI v = new PortVPIVCI(2, 2, 2);
             VCArray.Add(k, v);
         }
-
-        /*
-                    log.AppendText("wysyłam pakiet!\n");
-                    BinaryFormatter bformatter = new BinaryFormatter();
-                    bformatter.Serialize(netStream, packet);
-                    netStream.Close();
-        */
 
         private void connectToCloud(object sender, EventArgs e) {
             if (IPAddress.TryParse(cloudIPField.Text, out cloudAddress)) {
@@ -131,6 +124,7 @@ namespace Nodix {
 
             }
             catch (SocketException ex) {
+                Console.WriteLine(ex.StackTrace);
                 isConnectedToManager = false;
                 log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to manager\n");
                 log.AppendText("Wrong IP or port?\n");
@@ -165,20 +159,22 @@ namespace Nodix {
         private void sender() {
             if (!queuedReceivedPackets.IsEmpty) {
                 queuedReceivedPackets.TryDequeue(out processedPacket);
-                VPIVCI VCConKey = new VPIVCI();
-                VPIVCI VPConKey = new VPIVCI();
-                VPIVCI value = new VPIVCI();
+                PortVPIVCI VCConKey = new PortVPIVCI();
+                PortVPIVCI VPConKey = new PortVPIVCI();
+                PortVPIVCI value = new PortVPIVCI();
+                VCConKey.port = processedPacket.port;
                 VCConKey.VPI = processedPacket.VPI;
                 VCConKey.VCI = processedPacket.VCI;
+                VPConKey.port = processedPacket.port;
                 VPConKey.VPI = processedPacket.VPI;
                 VPConKey.VCI = 65536;
                 NetworkStream networkStream = new NetworkStream(cloudSocket);
                 if (VCArray.ContainsKey(VCConKey)) {
                     if (VCArray.TryGetValue(VCConKey, out value)) {
-                        SetText("Przekierowywanie [" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + value.VPI + ";" + value.VCI + "]\n");
+                        SetText("Przekierowywanie [" + processedPacket.port + ";" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + processedPacket.port + ";" + value.VPI + ";" + value.VCI + "]\n");
                         processedPacket.VPI = value.VPI;
                         processedPacket.VCI = value.VCI;
-                        //TODO co z portami?
+                        processedPacket.port = value.port;
                         BinaryFormatter bformatter = new BinaryFormatter();
                         bformatter.Serialize(networkStream, processedPacket);
                         networkStream.Close();
@@ -190,10 +186,10 @@ namespace Nodix {
                 else if (VCArray.ContainsKey(VPConKey)) {
                     if (VCArray.TryGetValue(VPConKey, out value)) {
 
-                        SetText("Przekierowywanie [" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + value.VPI + ";" + value.VCI + "]\n");
+                        SetText("Przekierowywanie [" + processedPacket.port + ";" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + processedPacket.port + ";" + value.VPI + ";" + value.VCI + "]\n");
                         processedPacket.VPI = value.VPI;
+                        processedPacket.port = value.port;
                         // VCI bez zmian
-                        //TODO co z portami?
                         BinaryFormatter bformatter = new BinaryFormatter();
                         bformatter.Serialize(netStream, processedPacket);
                         networkStream.Close();
@@ -208,27 +204,64 @@ namespace Nodix {
             }
         }
 
-        public void addEntry(VPIVCI key, VPIVCI value) {
+        //Dodaje pozycję do VCArray, pobiera dwa obiekty PortVPIVCI
+        //WAŻNE - dodaje wpis 'w obie strony'
+        public void addEntry(PortVPIVCI key, PortVPIVCI value) {
+            if (VCArray.ContainsKey(key))
+            {
+                SetText("Zmieniam stary klucz VCArray\n");
+                VCArray.Remove(key);
+                VCArray.Add(key, value);
+                VCArray.Add(value, key);
+            }
+            else
+            {
+                VCArray.Add(key, value);
+                VCArray.Add(value, key);
+            }
+        }
+
+        //Dodaje pozycję do VCArray, pobiera inty jako poszczególne wartości
+        //WAŻNE - dodaje wpis 'w obie strony'
+        public void addEntry(int keyPort, int keyVPI, int keyVCI, int valuePort, int valueVPI, int valueVCI) {
+            PortVPIVCI key = new PortVPIVCI(keyPort, keyVPI, keyVCI);
+            PortVPIVCI value = new PortVPIVCI(keyPort, keyVPI, keyVCI);
             if (VCArray.ContainsKey(key)) {
                 SetText("Zmieniam stary klucz VCArray\n");
                 VCArray.Remove(key);
                 VCArray.Add(key, value);
+                VCArray.Add(value, key);
             }
-            else VCArray.Add(key, value);
-        }
-
-        public void addEntry(int keyVPI, int keyVCI, int valueVPI, int valueVCI) {
-            VPIVCI key = new VPIVCI(keyVPI, keyVCI);
-            VPIVCI value = new VPIVCI(keyVPI, keyVCI);
-            if (VCArray.ContainsKey(key)) {
-                SetText("Zmieniam stary klucz VCArray\n");
-                VCArray.Remove(key);
+            else {
                 VCArray.Add(key, value);
+                VCArray.Add(value, key);
             }
-            else VCArray.Add(key, value);
         }
 
-        public void removeEntry(VPIVCI key) {
+        //usuwa pojedynczy wpis
+        public void removeSingleEntry(PortVPIVCI key) {
+            if (VCArray.ContainsKey(key)) {
+                SetText("Usuwam klucz w VCArray\n");
+                VCArray.Remove(key);
+            }
+            else SetText("Nie ma takiego klucza\n");
+        }
+        //usuwa oba wpisy, jak się nie da to usuwa tylko jeden
+        public void removeEntry(PortVPIVCI key) {
+            if (VCArray.ContainsKey(key) && VCArray.ContainsValue(key)) {
+                SetText("Usuwam klucz w VCArray\n");
+                VCArray.Remove(key);
+                PortVPIVCI temp = null;
+                VCArray.TryGetValue(key, out temp);
+                if (temp != null) {
+                    VCArray.Remove(temp);
+                }
+            } else removeSingleEntry(key);
+        }
+
+        //usuwa pojedynczy wpis
+        public void removeSingleEntry(int keyPort, int keyVPI, int keyVCI) {
+            PortVPIVCI key = new PortVPIVCI(keyPort, keyVPI, keyVCI);
             if (VCArray.ContainsKey(key)) {
                 SetText("Usuwam klucz w VCArray\n");
                 VCArray.Remove(key);
@@ -236,17 +269,22 @@ namespace Nodix {
             else SetText("Nie ma takiego klucza\n");
         }
 
-        public void removeEntry(int keyVPI, int keyVCI) {
-            VPIVCI key = new VPIVCI(keyVPI, keyVCI);
-            if (VCArray.ContainsKey(key)) {
+        //usuwa oba wpisy, jak się nie uda to tylko jeden
+        public void removeEntry(int keyPort, int keyVPI, int keyVCI) {
+            PortVPIVCI key = new PortVPIVCI(keyPort, keyVPI, keyVCI);
+            if (VCArray.ContainsKey(key) && VCArray.ContainsValue(key)) {
                 SetText("Usuwam klucz w VCArray\n");
                 VCArray.Remove(key);
-            }
-            else SetText("Nie ma takiego klucza\n");
+                PortVPIVCI temp = null;
+                VCArray.TryGetValue(key, out temp);
+                if (temp != null) {
+                    VCArray.Remove(temp);
+                }
+            } else removeSingleEntry(key);
         }
 
         public void clearTable() {
-            VCArray = new Dictionary<VPIVCI, VPIVCI>(new VPIVCIComparer());
+            VCArray = new Dictionary<PortVPIVCI, PortVPIVCI>(new PortVPIVCIComparer());
         }
     }
 }

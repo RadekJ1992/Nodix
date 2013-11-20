@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodix", "Nodix\Nodix.csproj", "{7EB6FAE4-8899-4CA9-B10E-47FC07E189ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Packet", "..\ClassLibrary1\ClassLibrary1\Packet.csproj", "{7C42F514-EA47-44C9-AD87-8FAFC77521DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Packet", "..\Packet\ClassLibrary1\Packet.csproj", "{7C42F514-EA47-44C9-AD87-8FAFC77521DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
