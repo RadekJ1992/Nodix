@@ -40,6 +40,8 @@ namespace Nodix {
         private IPEndPoint cloudEndPoint;
         private IPEndPoint managerEndPoint;
 
+        private NetworkStream networkStream;
+
         private Socket cloudSocket;
         private Socket managerSocket;
 
@@ -57,8 +59,8 @@ namespace Nodix {
         // UWAGA!
 
         // w momencie gdy chcemy ustawić połączenie VP (jak na slajdzie 22 z wykładów TSST to wartość VCI w strukturze 
-        // trzeba ustawić na 65536. Musiałem zaimplementować coś w stylu tej kreski co jest w [a,-] -> [b,-], a skoro
-        // pole VCI ma 16 bitów to ten int zgodnie z założeniami może przybierać wartośći od 0 do 65535, 65536 jest poza
+        // trzeba ustawić na 0. Musiałem zaimplementować coś w stylu tej kreski co jest w [a,-] -> [b,-], a skoro
+        // pole VCI ma 16 bitów to ten int zgodnie z założeniami może przybierać wartośći od 1 do 65536, 0 jest poza
         //jego zasięgiem
 
         //
@@ -92,6 +94,7 @@ namespace Nodix {
                 cloudSocket.Connect(cloudEndPoint);
                 isConnectedToCloud = true;
                 receiveThread = new Thread(this.receiver);
+                receiveThread.IsBackground = true;
                 receiveThread.Start();
             }
             catch (SocketException ex) {
@@ -136,14 +139,17 @@ namespace Nodix {
         }
 
         private void receiver() {
-            NetworkStream networkStream = new NetworkStream(cloudSocket);
+            if (networkStream == null) {
+                networkStream = new NetworkStream(cloudSocket);
+            }
             BinaryFormatter bf = new BinaryFormatter();
             try {
                 receivedPacket = (Packet.ATMPacket)bf.Deserialize(networkStream);
                 queuedReceivedPackets.Enqueue(receivedPacket);
             } catch { }
-            networkStream.Close();
+           // networkStream.Close();
             sendThread = new Thread(this.sender);
+            sendThread.IsBackground = true;
             sendThread.Start();
             receiver();
         }
@@ -174,7 +180,7 @@ namespace Nodix {
                     VCConKey.VCI = processedPacket.VCI;
                     VPConKey.port = processedPacket.port;
                     VPConKey.VPI = processedPacket.VPI;
-                    VPConKey.VCI = 65536;
+                    VPConKey.VCI = 0;
                     NetworkStream networkStream = new NetworkStream(cloudSocket);
                     if (VCArray.ContainsKey(VCConKey)) {
                         if (VCArray.TryGetValue(VCConKey, out value)) {
