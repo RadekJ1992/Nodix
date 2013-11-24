@@ -23,8 +23,9 @@ namespace Nodix {
         private Packet.ATMPacket receivedPacket;
         private Packet.ATMPacket processedPacket;
 
-        //unikalna nazwa danego węzła
-        public String name { get; set; }
+        //unikalny numer danego węzła
+        public int nodeNumber { get; set; }
+        private bool isNodeNumberSet;
 
         //kolejka pakietów odebranych z chmury - concurrentQueue jest thread-safe, zwykła queue nie
         private ConcurrentQueue<Packet.ATMPacket> queuedReceivedPackets = new ConcurrentQueue<Packet.ATMPacket>();
@@ -68,79 +69,85 @@ namespace Nodix {
 
         public Nodix() {
             InitializeComponent();
+            isNodeNumberSet = false;
             PortVPIVCI k = new PortVPIVCI(4, 3, 2);
             PortVPIVCI v = new PortVPIVCI(2, 2, 2);
-            VCArray.Add(k, v);
+            addEntry(k, v);
         }
 
         private void connectToCloud(object sender, EventArgs e) {
-            if (IPAddress.TryParse(cloudIPField.Text, out cloudAddress)) {
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud IP set properly as " + cloudAddress.ToString() + " \n");
-            }
-            else {
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud IP" + " \n");
-            }
-            if (Int32.TryParse(cloudPortField.Text, out cloudPort)) {
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud port set properly as " + cloudPort.ToString() + " \n");
-            }
-            else {
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud Port" + " \n");
-            }
+            if (isNodeNumberSet) {
+                if (IPAddress.TryParse(cloudIPField.Text, out cloudAddress)) {
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud IP set properly as " + cloudAddress.ToString() + " \n");
+                } else {
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud IP" + " \n");
+                }
+                if (Int32.TryParse(cloudPortField.Text, out cloudPort)) {
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud port set properly as " + cloudPort.ToString() + " \n");
+                } else {
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud Port" + " \n");
+                }
 
-            cloudSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                cloudSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            cloudEndPoint = new IPEndPoint(cloudAddress, cloudPort);
-            try {
-                cloudSocket.Connect(cloudEndPoint);
-                isConnectedToCloud = true;
-                receiveThread = new Thread(this.receiver);
-                receiveThread.IsBackground = true;
-                receiveThread.Start();
-            }
-            catch (SocketException ex) {
-                isConnectedToCloud = false;
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to cloud\n");
-                log.AppendText("Wrong IP or port?\n");
-            }
+                cloudEndPoint = new IPEndPoint(cloudAddress, cloudPort);
+                try {
+                    cloudSocket.Connect(cloudEndPoint);
+                    isConnectedToCloud = true;
+                    receiveThread = new Thread(this.receiver);
+                    receiveThread.IsBackground = true;
+                    receiveThread.Start();
+                } catch (SocketException ex) {
+                    isConnectedToCloud = false;
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to cloud\n");
+                    log.AppendText("Wrong IP or port?\n");
+                }
+            } else SetText("Ustal numer węzła!\n");
         }
 
         private void connectToManager(object sender, EventArgs e) {
-            if (IPAddress.TryParse(managerIPField.Text, out managerAddress)) {
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Manager IP set properly as " + managerAddress.ToString() + " \n");
-            }
-            else {
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading manager IP" + " \n");
-            }
-            if (Int32.TryParse(managerPortField.Text, out managerPort)) {
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Manager port set properly as " + managerPort.ToString() + " \n");
-            }
-            else {
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading manager Port" + " \n");
-            }
+            if (isNodeNumberSet) {
+                if (IPAddress.TryParse(managerIPField.Text, out managerAddress)) {
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Manager IP set properly as " + managerAddress.ToString() + " \n");
+                } else {
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading manager IP" + " \n");
+                }
+                if (Int32.TryParse(managerPortField.Text, out managerPort)) {
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Manager port set properly as " + managerPort.ToString() + " \n");
+                } else {
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading manager Port" + " \n");
+                }
 
-            managerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                managerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            managerEndPoint = new IPEndPoint(managerAddress, managerPort);
-            try {
-                managerSocket.Connect(managerEndPoint);
-                isConnectedToManager = true;
+                managerEndPoint = new IPEndPoint(managerAddress, managerPort);
+                try {
+                    managerSocket.Connect(managerEndPoint);
+                    isConnectedToManager = true;
 
-                //działanie AGENTA
+                    //działanie AGENTA
 
 
-            }
-            catch (SocketException ex) {
-                Console.WriteLine(ex.StackTrace);
-                isConnectedToManager = false;
-                log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to manager\n");
-                log.AppendText("Wrong IP or port?\n");
-            }
+                } catch (SocketException ex) {
+                    Console.WriteLine(ex.StackTrace);
+                    isConnectedToManager = false;
+                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to manager\n");
+                    log.AppendText("Wrong IP or port?\n");
+                }
+            } else SetText("Ustal numer węzła!\n");
             
         }
 
         private void receiver() {
             if (networkStream == null) {
                 networkStream = new NetworkStream(cloudSocket);
+                
+                //tworzy string 'hello node ' i tu jego numer
+                String welcomeString = "hello node " + nodeNumber;
+                //tworzy tablicę bajtów z tego stringa
+                byte[] welcomeStringBytes = AAL.GetBytesFromString(welcomeString);
+                //wysyła tą tablicę bajtów streamem
+                networkStream.Write(welcomeStringBytes, 0, welcomeStringBytes.Length);
             }
             BinaryFormatter bf = new BinaryFormatter();
             try {
@@ -295,6 +302,17 @@ namespace Nodix {
 
         public void clearTable() {
             VCArray = new Dictionary<PortVPIVCI, PortVPIVCI>(new PortVPIVCIComparer());
+        }
+
+        private void setNodeNumber_Click(object sender, EventArgs e) {
+            try {
+                nodeNumber = int.Parse(NodeNumberField.Text);
+                isNodeNumberSet = true;
+                SetText("Numer węzła ustawiony jako " + nodeNumber + "\n");
+            } catch {
+                isNodeNumberSet = false;
+                SetText("Numer węzła musi być NUMEREM!\n");
+            }
         }
     }
 }
