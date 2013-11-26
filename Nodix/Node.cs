@@ -142,8 +142,8 @@ namespace Nodix {
             if (networkStream == null) {
                 networkStream = new NetworkStream(cloudSocket);
                 
-                //tworzy string 'hello node ' i tu jego numer
-                String welcomeString = "hello node " + nodeNumber;
+                //tworzy string 'Node ' i tu jego numer
+                String welcomeString = "Node " + nodeNumber;
                 //tworzy tablicę bajtów z tego stringa
                 byte[] welcomeStringBytes = AAL.GetBytesFromString(welcomeString);
                 //wysyła tą tablicę bajtów streamem
