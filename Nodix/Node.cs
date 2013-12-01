@@ -75,31 +75,33 @@ namespace Nodix {
 
         private void connectToCloud(object sender, EventArgs e) {
             if (isNodeNumberSet) {
-                if (IPAddress.TryParse(cloudIPField.Text, out cloudAddress)) {
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud IP set properly as " + cloudAddress.ToString() + " \n");
-                } else {
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud IP" + " \n");
-                }
-                if (Int32.TryParse(cloudPortField.Text, out cloudPort)) {
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud port set properly as " + cloudPort.ToString() + " \n");
-                } else {
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud Port" + " \n");
-                }
+                if (!isConnectedToCloud) {
+                    if (IPAddress.TryParse(cloudIPField.Text, out cloudAddress)) {
+                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud IP set properly as " + cloudAddress.ToString() + " \n");
+                    } else {
+                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud IP" + " \n");
+                    }
+                    if (Int32.TryParse(cloudPortField.Text, out cloudPort)) {
+                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud port set properly as " + cloudPort.ToString() + " \n");
+                    } else {
+                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud Port" + " \n");
+                    }
 
-                cloudSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    cloudSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                cloudEndPoint = new IPEndPoint(cloudAddress, cloudPort);
-                try {
-                    cloudSocket.Connect(cloudEndPoint);
-                    isConnectedToCloud = true;
-                    receiveThread = new Thread(this.receiver);
-                    receiveThread.IsBackground = true;
-                    receiveThread.Start();
-                } catch {
-                    isConnectedToCloud = false;
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to cloud\n");
-                    log.AppendText("Wrong IP or port?\n");
-                }
+                    cloudEndPoint = new IPEndPoint(cloudAddress, cloudPort);
+                    try {
+                        cloudSocket.Connect(cloudEndPoint);
+                        isConnectedToCloud = true;
+                        receiveThread = new Thread(this.receiver);
+                        receiveThread.IsBackground = true;
+                        receiveThread.Start();
+                    } catch {
+                        isConnectedToCloud = false;
+                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to cloud\n");
+                        log.AppendText("Wrong IP or port?\n");
+                    }
+                } else SetText("Węzeł jest już połączony z chmurą\n");
             } else SetText("Ustal numer węzła!\n");
         }
 
@@ -229,6 +231,7 @@ namespace Nodix {
         public void addEntry(PortVPIVCI key, PortVPIVCI value) {
             if (VCArray.ContainsKey(key))
             {
+
                 SetText("Zmieniam stary klucz VCArray na [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
                 VCArray.Remove(key);
                 VCArray.Add(key, value);
@@ -248,7 +251,12 @@ namespace Nodix {
             PortVPIVCI key = new PortVPIVCI(keyPort, keyVPI, keyVCI);
             PortVPIVCI value = new PortVPIVCI(keyPort, keyVPI, keyVCI);
             if (VCArray.ContainsKey(key)) {
+                PortVPIVCI temp;
                 SetText("Zmieniam stary klucz VCArray na [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
+                VCArray.TryGetValue(key, out temp);
+                if (temp != null) {
+                    VCArray.Remove(temp);
+                }
                 VCArray.Remove(key);
                 VCArray.Add(key, value);
                 VCArray.Add(value, key);
