@@ -39,17 +39,15 @@ namespace Nodix {
         private Int32 managerPort;           //port chmury
 
         private IPEndPoint cloudEndPoint;
-        private IPEndPoint managerEndPoint;
+        public IPEndPoint managerEndPoint {get; private set;}
 
-        private NetworkStream networkStream;
+        private NetworkStream networkStream; // stream dla chmury
 
         private Socket cloudSocket;
         private Socket managerSocket;
 
         private Thread receiveThread;     //wątek służący do odbierania połączeń
         private Thread sendThread;        // analogicznie - do wysyłania
-
-        private NetworkStream netStream;
 
         public bool isRunning { get; private set; }     //info czy klient chodzi - dla zarządcy
 
@@ -153,15 +151,20 @@ namespace Nodix {
             try {
                 receivedPacket = (Packet.ATMPacket)bf.Deserialize(networkStream);
                 queuedReceivedPackets.Enqueue(receivedPacket);
-            } catch { }
-           // networkStream.Close();
             sendThread = new Thread(this.sender);
             sendThread.IsBackground = true;
             sendThread.Start();
             receiver();
+            } catch (Exception e) {
+                SetText("Coś poszło nie tak : " + e.Message + "\n");
+                cloudSocket = null;
+                cloudEndPoint = null;
+                networkStream = null;
+                isConnectedToCloud = false;
+            }
         }
 
-        private void SetText(string text) {
+        public void SetText(string text) {
             // InvokeRequired required compares the thread ID of the 
             // calling thread to the thread ID of the creating thread. 
             // If these threads are different, it returns true. 
@@ -209,7 +212,7 @@ namespace Nodix {
                             processedPacket.port = value.port;
                             // VCI bez zmian
                             BinaryFormatter bformatter = new BinaryFormatter();
-                            bformatter.Serialize(netStream, processedPacket);
+                            bformatter.Serialize(networkStream, processedPacket);
                             networkStream.Close();
                         } else {
                             SetText("Coś poszło nie tak przy przepisywaniu wartości VPI i VCI z VCArray\n");
