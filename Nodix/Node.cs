@@ -315,6 +315,12 @@ namespace Nodix {
                 isNodeNumberSet = false;
                 SetText("Numer węzła musi być NUMEREM!\n");
             }
+            inPortTextBox.Clear();
+            inVPITextBox.Clear();
+            inVCITextBox.Clear();
+            outPortTextBox.Clear();
+            outVPITextBox.Clear();
+            outVCITextBox.Clear();
         }
 
         private void addEntryButton_Click(object sender, EventArgs e) {
