@@ -16,7 +16,7 @@ using Packet;
 
 namespace Nodix {
     public partial class Nodix : Form {
-        //fuck delegates!
+        //fuck delegates! :)
         delegate void SetTextCallback(string text);
 
         //otrzymany i wysyłany pakiets
