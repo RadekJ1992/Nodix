@@ -97,7 +97,7 @@ namespace Nodix {
                     receiveThread = new Thread(this.receiver);
                     receiveThread.IsBackground = true;
                     receiveThread.Start();
-                } catch (SocketException ex) {
+                } catch {
                     isConnectedToCloud = false;
                     log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to cloud\n");
                     log.AppendText("Wrong IP or port?\n");
@@ -226,13 +226,14 @@ namespace Nodix {
         public void addEntry(PortVPIVCI key, PortVPIVCI value) {
             if (VCArray.ContainsKey(key))
             {
-                SetText("Zmieniam stary klucz VCArray\n");
+                SetText("Zmieniam stary klucz VCArray na [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
                 VCArray.Remove(key);
                 VCArray.Add(key, value);
                 VCArray.Add(value, key);
             }
             else
             {
+                SetText("Dodaję wpis [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
                 VCArray.Add(key, value);
                 VCArray.Add(value, key);
             }
@@ -244,12 +245,13 @@ namespace Nodix {
             PortVPIVCI key = new PortVPIVCI(keyPort, keyVPI, keyVCI);
             PortVPIVCI value = new PortVPIVCI(keyPort, keyVPI, keyVCI);
             if (VCArray.ContainsKey(key)) {
-                SetText("Zmieniam stary klucz VCArray\n");
+                SetText("Zmieniam stary klucz VCArray na [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
                 VCArray.Remove(key);
                 VCArray.Add(key, value);
                 VCArray.Add(value, key);
             }
             else {
+                SetText("Dodaję wpis [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
                 VCArray.Add(key, value);
                 VCArray.Add(value, key);
             }
@@ -312,6 +314,16 @@ namespace Nodix {
             } catch {
                 isNodeNumberSet = false;
                 SetText("Numer węzła musi być NUMEREM!\n");
+            }
+        }
+
+        private void addEntryButton_Click(object sender, EventArgs e) {
+            try {
+                PortVPIVCI inValue = new PortVPIVCI(int.Parse(inPortTextBox.Text), int.Parse(inVPITextBox.Text), int.Parse(inVCITextBox.Text));
+                PortVPIVCI outValue = new PortVPIVCI(int.Parse(outPortTextBox.Text), int.Parse(outVPITextBox.Text), int.Parse(outVCITextBox.Text));
+                addEntry(inValue, outValue);
+            } catch {
+                SetText("Złe wartości :<");
             }
         }
     }

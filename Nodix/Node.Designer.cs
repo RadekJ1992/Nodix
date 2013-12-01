@@ -37,6 +37,21 @@
             this.setNodeNumber = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.NodeNumberField = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.inPortTextBox = new System.Windows.Forms.TextBox();
+            this.inVPITextBox = new System.Windows.Forms.TextBox();
+            this.inVCITextBox = new System.Windows.Forms.TextBox();
+            this.outVCITextBox = new System.Windows.Forms.TextBox();
+            this.outVPITextBox = new System.Windows.Forms.TextBox();
+            this.outPortTextBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.addEntryButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cloudIPField
@@ -163,11 +178,150 @@
             this.NodeNumberField.Size = new System.Drawing.Size(100, 20);
             this.NodeNumberField.TabIndex = 14;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 336);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(26, 13);
+            this.label1.TabIndex = 19;
+            this.label1.Text = "Port";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(55, 320);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(57, 13);
+            this.label3.TabIndex = 20;
+            this.label3.Text = "WEJŚCIE:";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(55, 336);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(24, 13);
+            this.label4.TabIndex = 21;
+            this.label4.Text = "VPI";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(101, 336);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(24, 13);
+            this.label5.TabIndex = 22;
+            this.label5.Text = "VCI";
+            // 
+            // inPortTextBox
+            // 
+            this.inPortTextBox.Location = new System.Drawing.Point(12, 352);
+            this.inPortTextBox.Name = "inPortTextBox";
+            this.inPortTextBox.Size = new System.Drawing.Size(40, 20);
+            this.inPortTextBox.TabIndex = 23;
+            // 
+            // inVPITextBox
+            // 
+            this.inVPITextBox.Location = new System.Drawing.Point(58, 352);
+            this.inVPITextBox.Name = "inVPITextBox";
+            this.inVPITextBox.Size = new System.Drawing.Size(40, 20);
+            this.inVPITextBox.TabIndex = 24;
+            // 
+            // inVCITextBox
+            // 
+            this.inVCITextBox.Location = new System.Drawing.Point(104, 352);
+            this.inVCITextBox.Name = "inVCITextBox";
+            this.inVCITextBox.Size = new System.Drawing.Size(40, 20);
+            this.inVCITextBox.TabIndex = 25;
+            // 
+            // outVCITextBox
+            // 
+            this.outVCITextBox.Location = new System.Drawing.Point(243, 352);
+            this.outVCITextBox.Name = "outVCITextBox";
+            this.outVCITextBox.Size = new System.Drawing.Size(40, 20);
+            this.outVCITextBox.TabIndex = 32;
+            // 
+            // outVPITextBox
+            // 
+            this.outVPITextBox.Location = new System.Drawing.Point(197, 352);
+            this.outVPITextBox.Name = "outVPITextBox";
+            this.outVPITextBox.Size = new System.Drawing.Size(40, 20);
+            this.outVPITextBox.TabIndex = 31;
+            // 
+            // outPortTextBox
+            // 
+            this.outPortTextBox.Location = new System.Drawing.Point(151, 352);
+            this.outPortTextBox.Name = "outPortTextBox";
+            this.outPortTextBox.Size = new System.Drawing.Size(40, 20);
+            this.outPortTextBox.TabIndex = 30;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(240, 336);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(24, 13);
+            this.label6.TabIndex = 29;
+            this.label6.Text = "VCI";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(194, 336);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(24, 13);
+            this.label7.TabIndex = 28;
+            this.label7.Text = "VPI";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(194, 320);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(57, 13);
+            this.label8.TabIndex = 27;
+            this.label8.Text = "WYJŚCIE:";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(151, 336);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(26, 13);
+            this.label9.TabIndex = 26;
+            this.label9.Text = "Port";
+            // 
+            // addEntryButton
+            // 
+            this.addEntryButton.Location = new System.Drawing.Point(290, 323);
+            this.addEntryButton.Name = "addEntryButton";
+            this.addEntryButton.Size = new System.Drawing.Size(44, 48);
+            this.addEntryButton.TabIndex = 33;
+            this.addEntryButton.Text = "Dodaj";
+            this.addEntryButton.UseVisualStyleBackColor = true;
+            this.addEntryButton.Click += new System.EventHandler(this.addEntryButton_Click);
+            // 
             // Nodix
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(346, 329);
+            this.ClientSize = new System.Drawing.Size(346, 384);
+            this.Controls.Add(this.addEntryButton);
+            this.Controls.Add(this.outVCITextBox);
+            this.Controls.Add(this.outVPITextBox);
+            this.Controls.Add(this.outPortTextBox);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.inVCITextBox);
+            this.Controls.Add(this.inVPITextBox);
+            this.Controls.Add(this.inPortTextBox);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.setNodeNumber);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.NodeNumberField);
@@ -205,6 +359,21 @@
         private System.Windows.Forms.Button setNodeNumber;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox NodeNumberField;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox inPortTextBox;
+        private System.Windows.Forms.TextBox inVPITextBox;
+        private System.Windows.Forms.TextBox inVCITextBox;
+        private System.Windows.Forms.TextBox outVCITextBox;
+        private System.Windows.Forms.TextBox outVPITextBox;
+        private System.Windows.Forms.TextBox outPortTextBox;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Button addEntryButton;
     }
 }
 
