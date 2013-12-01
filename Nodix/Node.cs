@@ -318,12 +318,6 @@ namespace Nodix {
                 isNodeNumberSet = false;
                 SetText("Numer węzła musi być NUMEREM!\n");
             }
-            inPortTextBox.Clear();
-            inVPITextBox.Clear();
-            inVCITextBox.Clear();
-            outPortTextBox.Clear();
-            outVPITextBox.Clear();
-            outVCITextBox.Clear();
         }
 
         private void addEntryButton_Click(object sender, EventArgs e) {
@@ -331,9 +325,13 @@ namespace Nodix {
                 PortVPIVCI inValue = new PortVPIVCI(int.Parse(inPortTextBox.Text), int.Parse(inVPITextBox.Text), int.Parse(inVCITextBox.Text));
                 PortVPIVCI outValue = new PortVPIVCI(int.Parse(outPortTextBox.Text), int.Parse(outVPITextBox.Text), int.Parse(outVCITextBox.Text));
                 addEntry(inValue, outValue);
-            } catch {
-                SetText("Złe wartości :<");
-            }
+            } catch {}
+            inPortTextBox.Clear();
+            inVPITextBox.Clear();
+            inVCITextBox.Clear();
+            outPortTextBox.Clear();
+            outVPITextBox.Clear();
+            outVCITextBox.Clear();
         }
     }
 }
