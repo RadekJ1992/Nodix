@@ -44,7 +44,7 @@ namespace Nodix {
         private NetworkStream networkStream; // stream dla chmury
 
         private Socket cloudSocket;
-        private Socket managerSocket;
+        public Socket managerSocket { get; private set; }
 
         private Thread receiveThread;     //wątek służący do odbierania połączeń
         private Thread sendThread;        // analogicznie - do wysyłania
@@ -52,7 +52,12 @@ namespace Nodix {
         public bool isRunning { get; private set; }     //info czy klient chodzi - dla zarządcy
 
         public bool isConnectedToCloud { get; private set; } // czy połączony z chmurą?
-        public bool isConnectedToManager { get; private set; } // czy połączony z zarządcą?
+        public bool isConnectedToManager { get; set; } // czy połączony z zarządcą?
+
+        public bool isLoggedToManager { get; set; } // czy zalogowany w zarządcy?
+
+        //agent zarządzania
+        private Agentix agent;
 
         // tablica kierowania
         // UWAGA!
@@ -68,6 +73,7 @@ namespace Nodix {
         public Nodix() {
             InitializeComponent();
             isNodeNumberSet = false;
+            isLoggedToManager = false;
         }
 
         private void connectToCloud(object sender, EventArgs e) {
@@ -121,12 +127,10 @@ namespace Nodix {
                 try {
                     managerSocket.Connect(managerEndPoint);
                     isConnectedToManager = true;
-
-                    //działanie AGENTA
-
-
+                    agent = new Agentix(this);
+                    agent.start();
+                    agent.SendLoginT();
                 } catch (SocketException ex) {
-                    Console.WriteLine(ex.StackTrace);
                     isConnectedToManager = false;
                     log.AppendText("Błąd podczas łączenia się z zarządcą!\n");
                     log.AppendText("Złe IP lub port? Zarządca nie działa?\n");
@@ -172,7 +176,9 @@ namespace Nodix {
                 this.Invoke(d, new object[] { text });
             }
             else {
-                this.log.AppendText(text);
+                try {
+                    this.log.AppendText(text);
+                } catch { }
             }
         }
 
@@ -277,7 +283,9 @@ namespace Nodix {
         //usuwa pojedynczy wpis
         public void removeSingleEntry(PortVPIVCI key) {
             if (VCArray.ContainsKey(key)) {
-                SetText("Usuwam klucz w VCArray\n");
+                PortVPIVCI temp = null;
+                VCArray.TryGetValue(key, out temp);
+                SetText("Usuwam klucz w VCArray [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + temp.port + ";" + temp.VPI + ";" + temp.VCI + "]\n");
                 VCArray.Remove(key);
             }
             else SetText("Nie ma takiego klucza\n");
@@ -285,13 +293,14 @@ namespace Nodix {
         //usuwa oba wpisy, jak się nie da to usuwa tylko jeden
         public void removeEntry(PortVPIVCI key) {
             if (VCArray.ContainsKey(key) && VCArray.ContainsValue(key)) {
-                SetText("Usuwam klucz w VCArray\n");
-                VCArray.Remove(key);
                 PortVPIVCI temp = null;
                 VCArray.TryGetValue(key, out temp);
                 if (temp != null) {
+                    SetText("Usuwam klucz w VCArray [" + temp.port + ";" + temp.VPI + ";" + temp.VCI + "] -> [" + key.port + ";" + key.VPI + ";" + key.VCI + "]\n");
                     VCArray.Remove(temp);
                 }
+                SetText("Usuwam klucz w VCArray [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + temp.port + ";" + temp.VPI + ";" + temp.VCI + "]\n");
+                VCArray.Remove(key);
             } else removeSingleEntry(key);
         }
 
@@ -299,7 +308,9 @@ namespace Nodix {
         public void removeSingleEntry(int keyPort, int keyVPI, int keyVCI) {
             PortVPIVCI key = new PortVPIVCI(keyPort, keyVPI, keyVCI);
             if (VCArray.ContainsKey(key)) {
-                SetText("Usuwam klucz w VCArray\n");
+                PortVPIVCI temp = null;
+                VCArray.TryGetValue(key, out temp);
+                SetText("Usuwam klucz w VCArray [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + temp.port + ";" + temp.VPI + ";" + temp.VCI + "]\n");
                 VCArray.Remove(key);
             }
             else SetText("Nie ma takiego klucza\n");
@@ -308,14 +319,15 @@ namespace Nodix {
         //usuwa oba wpisy, jak się nie uda to tylko jeden
         public void removeEntry(int keyPort, int keyVPI, int keyVCI) {
             PortVPIVCI key = new PortVPIVCI(keyPort, keyVPI, keyVCI);
-            if (VCArray.ContainsKey(key) && VCArray.ContainsValue(key)) {
-                SetText("Usuwam klucz w VCArray\n");
-                VCArray.Remove(key);
+            if (VCArray.ContainsKey(key)) {
                 PortVPIVCI temp = null;
                 VCArray.TryGetValue(key, out temp);
                 if (temp != null) {
+                    SetText("Usuwam klucz w VCArray [" + temp.port + ";" + temp.VPI + ";" + temp.VCI + "] -> [" + key.port + ";" + key.VPI + ";" + key.VCI + "]\n");
                     VCArray.Remove(temp);
                 }
+                SetText("Usuwam klucz w VCArray [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + temp.port + ";" + temp.VPI + ";" + temp.VCI + "]\n");
+                VCArray.Remove(key);
             } else removeSingleEntry(key);
         }
 
@@ -380,6 +392,127 @@ namespace Nodix {
                 SetText("Błąd podczas konfigurowania pliku konfiguracyjnego\n");
                 SetText(exc.Message + "\n");
             }
+        }
+    }
+
+    class Agentix {
+        StreamReader read = null;
+        StreamWriter write = null;
+        NetworkStream netstream = null;
+        bool isConnected = true;
+        Nodix parent;
+        private Thread writeThread;
+        private Thread readThread;
+
+        public Agentix(Nodix parent) {
+            this.parent = parent;
+            netstream = new NetworkStream(parent.managerSocket);
+            read = new StreamReader(netstream);
+            write = new StreamWriter(netstream);
+        }
+        //Funkcja odpowiedzialna za odbieraie danych od serwera
+        //wykonywana w osobnym watąku
+        private void reader() {
+
+            String odp;
+            Char[] delimitter = { ' ' };
+            String[] slowa;
+            while (parent.isConnectedToManager) {
+                try {
+                    odp = read.ReadLine();
+                    slowa = odp.Split(delimitter, StringSplitOptions.RemoveEmptyEntries);
+                    if (slowa[0] == "ADD") {
+                        //dodawanie wpisu
+                        int p1, vc1, vp1, p2, vc2, vp2;
+                        if (slowa.Length != 7) {
+                            parent.SetText("Zła liczba parametrów w ADD: " + slowa.Length + "\n");
+                        } else {
+
+                            p1 = int.Parse(slowa[1]);
+                            vp1 = int.Parse(slowa[2]);
+                            vc1 = int.Parse(slowa[3]);
+                            p2 = int.Parse(slowa[4]);
+                            vp2 = int.Parse(slowa[5]);
+                            vc2 = int.Parse(slowa[6]);
+                            parent.addEntry(p1, vp1, vc1, p2, vp2, vc2);
+                        }
+                    } else if (slowa[0] == "DELETE") {
+                        //usuwanie jednego wpisu
+                        int p1, vc1, vp1, p2, vc2, vp2;
+                        if (slowa.Length != 7) {
+                            parent.SetText("Zła liczba parametrów w DELETE: " + slowa.Length + "\n");
+                        } else {
+
+                            p1 = int.Parse(slowa[1]);
+                            vp1 = int.Parse(slowa[2]);
+                            vc1 = int.Parse(slowa[3]);
+                            p2 = int.Parse(slowa[4]);
+                            vp2 = int.Parse(slowa[5]);
+                            vc2 = int.Parse(slowa[6]);
+                            parent.removeEntry(p1, vp1, vc1);
+                           // parent.removeEntry(p2, vp2, vc1);
+
+                        }
+                    } else if (slowa[0] == "CLEAR") {
+                        //usuwanie wszystkich wpisów
+                        parent.clearTable();
+                    } else if (slowa[0] == "LOGGED") {
+                        //udane logowanie
+                        parent.isLoggedToManager = true;
+                        //parent.addEntry(slowa[1], new PortVPIVCI( int.Parse(slowa[2]), int.Parse(slowa[3]), int.Parse(slowa[4]));
+                    } else if (slowa[0] == "MSG" || slowa[0] == "ERROR" || slowa[0] == "DONE") {
+                        parent.SetText("Wykryto komunikat od zarządcy o treści:\n");
+                        parent.SetText(odp + "\n");
+                    }
+                } catch {
+                    parent.SetText("Problem w połączeniu się z zarządcą :<\n");
+                    parent.isConnectedToManager = false;
+                    writeThread.Abort();
+                    readThread.Abort();
+                }
+            }
+        }
+
+        //Funkcja przesyłająca dane do serwera
+        //Wykonywana w osobnym watku
+        
+        private void writer() {
+            while (parent.isConnectedToManager) {
+                try {
+                    String myString = Console.ReadLine();
+                    write.WriteLine(myString);
+                    write.Flush();
+                } catch {
+                    parent.isConnectedToManager = false;
+                    writeThread.Abort();
+                    readThread.Abort();
+                }
+            }
+        }
+        public void SendSMS(String sms) {
+            if (isConnected) {
+                write.WriteLine(sms);
+                write.Flush();
+            } else
+                parent.SetText("Nie da się wysłać wiadomości do zarządcy, brak połączenia");
+        }
+        public void start() {
+            if (parent.isConnectedToManager) {
+                parent.SetText("Połączono z zarządcą\n");
+
+                //watek wysyłający dane metoda writer
+                writeThread = new Thread(writer);
+                writeThread.Start();
+
+                //wątek odbierjący dane metoda reader
+                readThread = new Thread(reader);
+                readThread.Start();
+
+            } else
+                parent.SetText("Nie połączono z zarządcą");
+        }
+        public void SendLoginT() {
+            SendSMS("LOGINT\n" + parent.nodeNumber);
         }
     }
 }

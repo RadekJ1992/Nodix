@@ -16,8 +16,10 @@ namespace Nodix {
             Application.SetCompatibleTextRenderingDefault(false);
             Nodix n = new Nodix();
             if (args != null) {
-                configPath = args[0];
-                n.readConfig(configPath);
+                try {
+                    configPath = args[0];
+                    n.readConfig(configPath);
+                } catch {}
             }
             Application.Run(n);
         }
