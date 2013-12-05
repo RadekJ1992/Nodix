@@ -10,10 +10,16 @@ namespace Nodix {
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main() {
+        static void Main(string[] args) {
+            String configPath;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Nodix());
+            Nodix n = new Nodix();
+            if (args != null) {
+                configPath = args[0];
+                n.readConfig(configPath);
+            }
+            Application.Run(n);
         }
     }
 }

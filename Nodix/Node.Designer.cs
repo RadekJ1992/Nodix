@@ -52,6 +52,7 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.addEntryButton = new System.Windows.Forms.Button();
+            this.chooseTextFile = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cloudIPField
@@ -156,7 +157,7 @@
             // 
             this.setNodeNumber.Location = new System.Drawing.Point(227, 52);
             this.setNodeNumber.Name = "setNodeNumber";
-            this.setNodeNumber.Size = new System.Drawing.Size(97, 43);
+            this.setNodeNumber.Size = new System.Drawing.Size(97, 37);
             this.setNodeNumber.TabIndex = 18;
             this.setNodeNumber.Text = "Ustal numer węzła";
             this.setNodeNumber.UseVisualStyleBackColor = true;
@@ -302,11 +303,22 @@
             this.addEntryButton.UseVisualStyleBackColor = true;
             this.addEntryButton.Click += new System.EventHandler(this.addEntryButton_Click);
             // 
+            // chooseTextFile
+            // 
+            this.chooseTextFile.Location = new System.Drawing.Point(227, 95);
+            this.chooseTextFile.Name = "chooseTextFile";
+            this.chooseTextFile.Size = new System.Drawing.Size(97, 43);
+            this.chooseTextFile.TabIndex = 34;
+            this.chooseTextFile.Text = "Wybierz plik konfiguracyjny";
+            this.chooseTextFile.UseVisualStyleBackColor = true;
+            this.chooseTextFile.Click += new System.EventHandler(this.chooseTextFile_Click);
+            // 
             // Nodix
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(346, 384);
+            this.ClientSize = new System.Drawing.Size(341, 380);
+            this.Controls.Add(this.chooseTextFile);
             this.Controls.Add(this.addEntryButton);
             this.Controls.Add(this.outVCITextBox);
             this.Controls.Add(this.outVPITextBox);
@@ -374,6 +386,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button addEntryButton;
+        private System.Windows.Forms.Button chooseTextFile;
     }
 }
 

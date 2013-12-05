@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Packet;
+using System.IO;
 
 namespace Nodix {
     public partial class Nodix : Form {
@@ -68,9 +69,6 @@ namespace Nodix {
         public Nodix() {
             InitializeComponent();
             isNodeNumberSet = false;
-            PortVPIVCI k = new PortVPIVCI(4, 3, 2);
-            PortVPIVCI v = new PortVPIVCI(2, 2, 2);
-            addEntry(k, v);
         }
 
         private void connectToCloud(object sender, EventArgs e) {
@@ -231,15 +229,21 @@ namespace Nodix {
         public void addEntry(PortVPIVCI key, PortVPIVCI value) {
             if (VCArray.ContainsKey(key))
             {
-
+                PortVPIVCI temp;
                 SetText("Zmieniam stary klucz VCArray na [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
+                SetText("Zmieniam stary klucz VCArray na [" + value.port + ";" + value.VPI + ";" + value.VCI + "] -> [" + key.port + ";" + key.VPI + ";" + key.VCI + "]\n");
+                VCArray.TryGetValue(key, out temp);
+                if (temp != null) {
+                    VCArray.Remove(temp);
+                }
                 VCArray.Remove(key);
                 VCArray.Add(key, value);
                 VCArray.Add(value, key);
             }
             else
             {
-                SetText("Dodaję wpis [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
+                SetText("Dodaję wpis [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI + "]\n");
+                SetText("Dodaję wpis [" + value.port + ";" + value.VPI + ";" + value.VCI + "] -> [" + key.port + ";" + key.VPI + ";" + key.VCI + "]\n");
                 VCArray.Add(key, value);
                 VCArray.Add(value, key);
             }
@@ -247,12 +251,14 @@ namespace Nodix {
 
         //Dodaje pozycję do VCArray, pobiera inty jako poszczególne wartości
         //WAŻNE - dodaje wpis 'w obie strony'
+        //jeśli taki wpis już jest - usuwa stary wpis (też w obie strony) i go zastępuje
         public void addEntry(int keyPort, int keyVPI, int keyVCI, int valuePort, int valueVPI, int valueVCI) {
             PortVPIVCI key = new PortVPIVCI(keyPort, keyVPI, keyVCI);
-            PortVPIVCI value = new PortVPIVCI(keyPort, keyVPI, keyVCI);
+            PortVPIVCI value = new PortVPIVCI(valuePort, valueVPI, valueVCI);
             if (VCArray.ContainsKey(key)) {
                 PortVPIVCI temp;
                 SetText("Zmieniam stary klucz VCArray na [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
+                SetText("Zmieniam stary klucz VCArray na [" + value.port + ";" + value.VPI + ";" + value.VCI + "] -> [" + key.port + ";" + key.VPI + ";" + key.VCI + "]\n");
                 VCArray.TryGetValue(key, out temp);
                 if (temp != null) {
                     VCArray.Remove(temp);
@@ -263,6 +269,7 @@ namespace Nodix {
             }
             else {
                 SetText("Dodaję wpis [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI +"]\n");
+                SetText("Dodaję wpis [" + value.port + ";" + value.VPI + ";" + value.VCI + "] -> [" + key.port + ";" + key.VPI + ";" + key.VCI + "]\n");
                 VCArray.Add(key, value);
                 VCArray.Add(value, key);
             }
@@ -315,6 +322,7 @@ namespace Nodix {
 
         public void clearTable() {
             VCArray = new Dictionary<PortVPIVCI, PortVPIVCI>(new PortVPIVCIComparer());
+            SetText("Czyszczę tablicę kierowania\n");
         }
 
         private void setNodeNumber_Click(object sender, EventArgs e) {
@@ -340,6 +348,39 @@ namespace Nodix {
             outPortTextBox.Clear();
             outVPITextBox.Clear();
             outVCITextBox.Clear();
+        }
+
+        private void chooseTextFile_Click(object sender, EventArgs e) {
+            string path;
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog() == DialogResult.OK) {
+                path = openFileDialog.FileName;
+                readConfig(path);
+            }
+        }
+
+        public void readConfig(String path) {
+            try {
+                using (StreamReader sr = new StreamReader(path)) {
+                    string[] lines = System.IO.File.ReadAllLines(path);
+                    foreach (String line in lines) {
+                        String[] command = line.Split(' ');
+                        if (command[0] == "ADD") {
+                            try {
+                                addEntry(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]),
+                                    int.Parse(command[4]), int.Parse(command[5]), int.Parse(command[6]));
+                            } catch (IndexOutOfRangeException ioore) {
+                                SetText("Komenda została niepoprawnie sformułowana (za mało parametrów)\n");
+                            }
+                        } else if (command[0] == "CLEAR") {
+                            clearTable();
+                        }
+                    }
+                }
+            } catch (Exception exc) {
+                SetText("Błąd podczas konfigurowania pliku konfiguracyjnego\n");
+                SetText(exc.Message + "\n");
+            }
         }
     }
 }
