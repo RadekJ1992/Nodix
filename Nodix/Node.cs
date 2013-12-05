@@ -17,7 +17,6 @@ using System.IO;
 
 namespace Nodix {
     public partial class Nodix : Form {
-        //fuck delegates! :)
         delegate void SetTextCallback(string text);
 
         //otrzymany i wysyłany pakiets
@@ -75,14 +74,14 @@ namespace Nodix {
             if (isNodeNumberSet) {
                 if (!isConnectedToCloud) {
                     if (IPAddress.TryParse(cloudIPField.Text, out cloudAddress)) {
-                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud IP set properly as " + cloudAddress.ToString() + " \n");
+                        log.AppendText("IP ustawiono jako " + cloudAddress.ToString() + " \n");
                     } else {
-                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud IP" + " \n");
+                        log.AppendText("Błąd podczas ustawiania IP chmury (zły format?)" + " \n");
                     }
                     if (Int32.TryParse(cloudPortField.Text, out cloudPort)) {
-                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Cloud port set properly as " + cloudPort.ToString() + " \n");
+                        log.AppendText("Pory chmuru ustawiony jako " + cloudPort.ToString() + " \n");
                     } else {
-                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading cloud Port" + " \n");
+                        log.AppendText("Błąd podczas ustawiania portu chmury (zły format?)" + " \n");
                     }
 
                     cloudSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -96,8 +95,8 @@ namespace Nodix {
                         receiveThread.Start();
                     } catch {
                         isConnectedToCloud = false;
-                        log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to cloud\n");
-                        log.AppendText("Wrong IP or port?\n");
+                        log.AppendText("Błąd podczas łączenia się z chmurą\n");
+                        log.AppendText("Złe IP lub port? Chmura nie działa?\n");
                     }
                 } else SetText("Węzeł jest już połączony z chmurą\n");
             } else SetText("Ustal numer węzła!\n");
@@ -106,14 +105,14 @@ namespace Nodix {
         private void connectToManager(object sender, EventArgs e) {
             if (isNodeNumberSet) {
                 if (IPAddress.TryParse(managerIPField.Text, out managerAddress)) {
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Manager IP set properly as " + managerAddress.ToString() + " \n");
+                    log.AppendText("IP zarządcy ustawione jako " + managerAddress.ToString() + " \n");
                 } else {
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading manager IP" + " \n");
+                    log.AppendText("Błąd podczas ustawiania IP zarządcy\n");
                 }
                 if (Int32.TryParse(managerPortField.Text, out managerPort)) {
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Manager port set properly as " + managerPort.ToString() + " \n");
+                    log.AppendText("Port zarządcy ustawiony jako " + managerPort.ToString() + " \n");
                 } else {
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error reading manager Port" + " \n");
+                    log.AppendText("Błąd podczas ustawiania portu zarządcy\n");
                 }
 
                 managerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -129,8 +128,8 @@ namespace Nodix {
                 } catch (SocketException ex) {
                     Console.WriteLine(ex.StackTrace);
                     isConnectedToManager = false;
-                    log.AppendText(DateTime.Now.ToString(@"MM\/dd\/yyyy h\:mm tt") + " Error while connecting to manager\n");
-                    log.AppendText("Wrong IP or port?\n");
+                    log.AppendText("Błąd podczas łączenia się z zarządcą!\n");
+                    log.AppendText("Złe IP lub port? Zarządca nie działa?\n");
                 }
             } else SetText("Ustal numer węzła!\n");
             
