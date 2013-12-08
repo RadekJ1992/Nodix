@@ -110,31 +110,34 @@ namespace Nodix {
 
         private void connectToManager(object sender, EventArgs e) {
             if (isNodeNumberSet) {
-                if (IPAddress.TryParse(managerIPField.Text, out managerAddress)) {
-                    log.AppendText("IP zarządcy ustawione jako " + managerAddress.ToString() + " \n");
-                } else {
-                    log.AppendText("Błąd podczas ustawiania IP zarządcy\n");
-                }
-                if (Int32.TryParse(managerPortField.Text, out managerPort)) {
-                    log.AppendText("Port zarządcy ustawiony jako " + managerPort.ToString() + " \n");
-                } else {
-                    log.AppendText("Błąd podczas ustawiania portu zarządcy\n");
-                }
+                if (!isConnectedToManager) {
+                    if (IPAddress.TryParse(managerIPField.Text, out managerAddress)) {
+                        log.AppendText("IP zarządcy ustawione jako " + managerAddress.ToString() + " \n");
+                    } else {
+                        log.AppendText("Błąd podczas ustawiania IP zarządcy\n");
+                    }
+                    if (Int32.TryParse(managerPortField.Text, out managerPort)) {
+                        log.AppendText("Port zarządcy ustawiony jako " + managerPort.ToString() + " \n");
+                    } else {
+                        log.AppendText("Błąd podczas ustawiania portu zarządcy\n");
+                    }
 
-                managerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    managerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                managerEndPoint = new IPEndPoint(managerAddress, managerPort);
-                try {
-                    managerSocket.Connect(managerEndPoint);
-                    isConnectedToManager = true;
-                    agent = new Agentix(this);
-                    agent.start();
-                    agent.SendLoginT();
-                } catch (SocketException ex) {
-                    isConnectedToManager = false;
-                    log.AppendText("Błąd podczas łączenia się z zarządcą!\n");
-                    log.AppendText("Złe IP lub port? Zarządca nie działa?\n");
-                }
+                    managerEndPoint = new IPEndPoint(managerAddress, managerPort);
+                    try {
+                        managerSocket.Connect(managerEndPoint);
+                        isConnectedToManager = true;
+                        agent = new Agentix(this);
+                        agent.writeThread.Start();
+                        agent.readThread.Start();
+                        agent.sendLoginT = true;
+                    } catch (SocketException ex) {
+                        isConnectedToManager = false;
+                        log.AppendText("Błąd podczas łączenia się z zarządcą!\n");
+                        log.AppendText("Złe IP lub port? Zarządca nie działa?\n");
+                    }
+                } else SetText("Już jestem połączony z zarządcą!\n");
             } else SetText("Ustal numer węzła!\n");
             
         }
@@ -403,16 +406,18 @@ namespace Nodix {
         StreamReader read = null;
         StreamWriter write = null;
         NetworkStream netstream = null;
-        bool isConnected = true;
         Nodix parent;
-        private Thread writeThread;
-        private Thread readThread;
+        public Thread writeThread;
+        public Thread readThread;
+        public bool sendLoginT;
 
         public Agentix(Nodix parent) {
             this.parent = parent;
             netstream = new NetworkStream(parent.managerSocket);
             read = new StreamReader(netstream);
             write = new StreamWriter(netstream);
+            readThread = new Thread(reader);
+            writeThread = new Thread(writer);
         }
         //Funkcja odpowiedzialna za odbieraie danych od serwera
         //wykonywana w osobnym watąku
@@ -464,10 +469,21 @@ namespace Nodix {
                         //udane logowanie
                         parent.isLoggedToManager = true;
                         //parent.addEntry(slowa[1], new PortVPIVCI( int.Parse(slowa[2]), int.Parse(slowa[3]), int.Parse(slowa[4]));
-                    } else if (slowa[0] == "MSG" || slowa[0] == "ERROR" || slowa[0] == "DONE") {
+                    } else if (slowa[0] == "MSG" || slowa[0] == "DONE") {
                         parent.SetText("Wykryto komunikat od zarządcy o treści:\n");
                         parent.SetText(odp + "\n");
+                    } else if (slowa[0] == "ERR") {
+                        parent.SetText("Wykryto komunikat błędu o treści:");
+                        foreach (String s in slowa) {
+                            parent.SetText(" " + s + " ");
+                        }
+                        parent.SetText("\n");
+                        parent.isConnectedToManager = false;
+                        writeThread.Abort();
+                        readThread.Abort();
+                        parent.SetText("Połącz się ponownie!\n");
                     }
+
                 } catch {
                     parent.SetText("Problem w połączeniu się z zarządcą :<\n");
                     parent.isConnectedToManager = false;
@@ -483,9 +499,11 @@ namespace Nodix {
         private void writer() {
             while (parent.isConnectedToManager) {
                 try {
-                    String myString = Console.ReadLine();
-                    write.WriteLine(myString);
-                    write.Flush();
+                    if (sendLoginT) {
+                        write.WriteLine("LOGINT\n" + parent.nodeNumber);
+                        write.Flush();
+                        sendLoginT = false;
+                    }
                 } catch {
                     parent.isConnectedToManager = false;
                     writeThread.Abort();
@@ -493,6 +511,7 @@ namespace Nodix {
                 }
             }
         }
+        /*
         public void SendSMS(String sms) {
             if (isConnected) {
                 write.WriteLine(sms);
@@ -517,6 +536,6 @@ namespace Nodix {
         }
         public void SendLoginT() {
             SendSMS("LOGINT\n" + parent.nodeNumber);
-        }
+        }*/
     }
 }

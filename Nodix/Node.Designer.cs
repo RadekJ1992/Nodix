@@ -104,6 +104,7 @@
             this.managerPortField.Name = "managerPortField";
             this.managerPortField.Size = new System.Drawing.Size(100, 20);
             this.managerPortField.TabIndex = 6;
+            this.managerPortField.Text = "8002";
             // 
             // managerIPLabel
             // 
@@ -317,7 +318,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(341, 380);
+            this.ClientSize = new System.Drawing.Size(341, 377);
             this.Controls.Add(this.chooseTextFile);
             this.Controls.Add(this.addEntryButton);
             this.Controls.Add(this.outVCITextBox);
@@ -348,6 +349,10 @@
             this.Controls.Add(this.cloudPortField);
             this.Controls.Add(this.cloudIPLabel);
             this.Controls.Add(this.cloudIPField);
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(357, 415);
+            this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(357, 415);
             this.Name = "Nodix";
             this.Text = "Nodix";
             this.ResumeLayout(false);
