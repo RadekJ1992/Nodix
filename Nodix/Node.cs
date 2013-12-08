@@ -85,7 +85,7 @@ namespace Nodix {
                         log.AppendText("Błąd podczas ustawiania IP chmury (zły format?)" + " \n");
                     }
                     if (Int32.TryParse(cloudPortField.Text, out cloudPort)) {
-                        log.AppendText("Pory chmuru ustawiony jako " + cloudPort.ToString() + " \n");
+                        log.AppendText("Port chmury ustawiony jako " + cloudPort.ToString() + " \n");
                     } else {
                         log.AppendText("Błąd podczas ustawiania portu chmury (zły format?)" + " \n");
                     }
@@ -97,7 +97,7 @@ namespace Nodix {
                         cloudSocket.Connect(cloudEndPoint);
                         isConnectedToCloud = true;
                         receiveThread = new Thread(this.receiver);
-                        receiveThread.IsBackground = true;
+                        //receiveThread.IsBackground = true;
                         receiveThread.Start();
                     } catch {
                         isConnectedToCloud = false;
@@ -158,7 +158,7 @@ namespace Nodix {
                 receivedPacket = (Packet.ATMPacket)bf.Deserialize(networkStream);
                 queuedReceivedPackets.Enqueue(receivedPacket);
             sendThread = new Thread(this.sender);
-            sendThread.IsBackground = true;
+            //sendThread.IsBackground = true;
             sendThread.Start();
             receiver();
             } catch (Exception e) {
