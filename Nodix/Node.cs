@@ -97,7 +97,7 @@ namespace Nodix {
                         cloudSocket.Connect(cloudEndPoint);
                         isConnectedToCloud = true;
                         receiveThread = new Thread(this.receiver);
-                        //receiveThread.IsBackground = true;
+                        receiveThread.IsBackground = true;
                         receiveThread.Start();
                     } catch {
                         isConnectedToCloud = false;
@@ -130,7 +130,9 @@ namespace Nodix {
                         isConnectedToManager = true;
                         agent = new Agentix(this);
                         agent.writeThread.Start();
+                        agent.writeThread.IsBackground = true;
                         agent.readThread.Start();
+                        agent.readThread.IsBackground = true;
                         agent.sendLoginT = true;
                     } catch (SocketException ex) {
                         isConnectedToManager = false;
@@ -158,7 +160,7 @@ namespace Nodix {
                 receivedPacket = (Packet.ATMPacket)bf.Deserialize(networkStream);
                 queuedReceivedPackets.Enqueue(receivedPacket);
             sendThread = new Thread(this.sender);
-            //sendThread.IsBackground = true;
+            sendThread.IsBackground = true;
             sendThread.Start();
             receiver();
             } catch (Exception e) {
