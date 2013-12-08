@@ -11,14 +11,14 @@ namespace Nodix {
         /// </summary>
         [STAThread]
         static void Main(string[] args) {
-            String configPath;
+            String nNumber;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Nodix n = new Nodix();
             if (args != null) {
                 try {
-                    configPath = args[0];
-                    n.readConfig(configPath);
+                    nNumber = args[0];
+                    n.readConfig(nNumber);
                 } catch {}
             }
             Application.Run(n);

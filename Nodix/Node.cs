@@ -370,8 +370,12 @@ namespace Nodix {
             }
         }
 
-        public void readConfig(String path) {
+        public void readConfig(String nNumber) {
             try {
+                nodeNumber = int.Parse(nNumber);
+                NodeNumberField.Text = nodeNumber.ToString();
+                SetText("Ustalam numer węzła jako " + nodeNumber + "\n");
+                String path = "config" + nNumber + ".txt";
                 using (StreamReader sr = new StreamReader(path)) {
                     string[] lines = System.IO.File.ReadAllLines(path);
                     foreach (String line in lines) {
