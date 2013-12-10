@@ -56,6 +56,8 @@ namespace Nodix {
 
         public bool isLoggedToManager { get; set; } // czy zalogowany w zarządcy?
 
+        public bool isDisconnect;
+
         //agent zarządzania
         private Agentix agent;
 
@@ -74,6 +76,7 @@ namespace Nodix {
             InitializeComponent();
             isNodeNumberSet = false;
             isLoggedToManager = false;
+            isDisconnect = false;
         }
 
         private void connectToCloud(object sender, EventArgs e) {
@@ -134,7 +137,7 @@ namespace Nodix {
                         agent.readThread.Start();
                         agent.readThread.IsBackground = true;
                         agent.sendLoginT = true;
-                    } catch (SocketException ex) {
+                    } catch (SocketException) {
                         isConnectedToManager = false;
                         log.AppendText("Błąd podczas łączenia się z zarządcą!\n");
                         log.AppendText("Złe IP lub port? Zarządca nie działa?\n");
@@ -164,11 +167,8 @@ namespace Nodix {
             sendThread.Start();
             receiver();
             } catch (Exception e) {
-                SetText("Coś poszło nie tak : " + e.Message + "\n");
-                cloudSocket = null;
-                cloudEndPoint = null;
-                networkStream = null;
-                isConnectedToCloud = false;
+                if (isDisconnect) { SetText("Rozłączam się z chmurą!\n"); isDisconnect = false; networkStream = null; }
+                else { SetText("Coś poszło nie tak : " + e.Message + "\n"); }
             }
         }
 
@@ -285,6 +285,21 @@ namespace Nodix {
             }
         }
 
+        //Dodaje pozycję do VCArray, pobiera inty jako poszczególne wartości
+        //WAŻNE - dodaje wpis 'w jedna strone'
+        public void addSingleEntry(int keyPort, int keyVPI, int keyVCI, int valuePort, int valueVPI, int valueVCI) {
+            PortVPIVCI key = new PortVPIVCI(keyPort, keyVPI, keyVCI);
+            PortVPIVCI value = new PortVPIVCI(valuePort, valueVPI, valueVCI);
+            if (VCArray.ContainsKey(key)) {
+                SetText("Zmieniam stary klucz VCArray na [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI + "]\n");
+                VCArray.Remove(key);
+                VCArray.Add(key, value);
+            } else {
+                SetText("Dodaję klucz VCArray na [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI + "]\n");
+                VCArray.Add(key, value);
+            }
+        }
+
         //usuwa pojedynczy wpis
         public void removeSingleEntry(PortVPIVCI key) {
             if (VCArray.ContainsKey(key)) {
@@ -387,9 +402,9 @@ namespace Nodix {
                         String[] command = line.Split(' ');
                         if (command[0] == "ADD") {
                             try {
-                                addEntry(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]),
+                                addSingleEntry(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]),
                                     int.Parse(command[4]), int.Parse(command[5]), int.Parse(command[6]));
-                            } catch (IndexOutOfRangeException ioore) {
+                            } catch (IndexOutOfRangeException) {
                                 SetText("Komenda została niepoprawnie sformułowana (za mało parametrów)\n");
                             }
                         } else if (command[0] == "CLEAR") {
@@ -401,6 +416,29 @@ namespace Nodix {
                 SetText("Błąd podczas konfigurowania pliku konfiguracyjnego\n");
                 SetText(exc.Message + "\n");
             }
+        }
+
+        private void disconnectButton_Click(object sender, EventArgs e) {
+            isDisconnect = true;
+            isConnectedToCloud = false;
+            isConnectedToManager = false;
+            if (cloudSocket != null) cloudSocket.Close();
+            if (managerSocket != null) managerSocket.Close();
+        }
+
+        private void saveConfigButton_Click(object sender, EventArgs e) {
+            saveConfig();
+        }
+
+        private void saveConfig() {
+            List<String> lines = new List<String>();
+            foreach (PortVPIVCI key in VCArray.Keys) {
+                PortVPIVCI value;
+                if (VCArray.TryGetValue(key, out value)) lines.Add("ADD " + key.port + " " + key.VPI + " " + key.VCI + 
+                                                                    " " + value.port + " " + value.VPI + " " + value.VCI);
+            }
+            System.IO.File.WriteAllLines("config"+nodeNumber+".txt", lines);
+            SetText("Zapisuję ustawienia do pliku config" + nodeNumber + ".txt\n");
         }
     }
 
@@ -487,10 +525,18 @@ namespace Nodix {
                     }
 
                 } catch {
-                    parent.SetText("Problem w połączeniu się z zarządcą :<\n");
-                    parent.isConnectedToManager = false;
-                    writeThread.Abort();
-                    readThread.Abort();
+                    if (parent.isDisconnect) {
+                        parent.SetText("Rozłączam się z zarządcą!\n");
+                        parent.isConnectedToManager = false;
+                        writeThread.Abort();
+                        readThread.Abort();
+                        parent.isDisconnect = false;
+                    } else {
+                        parent.SetText("Problem w połączeniu się z zarządcą :<\n");
+                        parent.isConnectedToManager = false;
+                        writeThread.Abort();
+                        readThread.Abort();
+                    }
                 }
             }
         }
@@ -513,31 +559,6 @@ namespace Nodix {
                 }
             }
         }
-        /*
-        public void SendSMS(String sms) {
-            if (isConnected) {
-                write.WriteLine(sms);
-                write.Flush();
-            } else
-                parent.SetText("Nie da się wysłać wiadomości do zarządcy, brak połączenia");
-        }
-        public void start() {
-            if (parent.isConnectedToManager) {
-                parent.SetText("Połączono z zarządcą\n");
-
-                //watek wysyłający dane metoda writer
-                writeThread = new Thread(writer);
-                writeThread.Start();
-
-                //wątek odbierjący dane metoda reader
-                readThread = new Thread(reader);
-                readThread.Start();
-
-            } else
-                parent.SetText("Nie połączono z zarządcą");
-        }
-        public void SendLoginT() {
-            SendSMS("LOGINT\n" + parent.nodeNumber);
-        }*/
+        
     }
 }

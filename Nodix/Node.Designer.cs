@@ -53,6 +53,8 @@
             this.label9 = new System.Windows.Forms.Label();
             this.addEntryButton = new System.Windows.Forms.Button();
             this.chooseTextFile = new System.Windows.Forms.Button();
+            this.saveConfigButton = new System.Windows.Forms.Button();
+            this.disconnectButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cloudIPField
@@ -156,9 +158,9 @@
             // 
             // setNodeNumber
             // 
-            this.setNodeNumber.Location = new System.Drawing.Point(227, 52);
+            this.setNodeNumber.Location = new System.Drawing.Point(224, 52);
             this.setNodeNumber.Name = "setNodeNumber";
-            this.setNodeNumber.Size = new System.Drawing.Size(97, 37);
+            this.setNodeNumber.Size = new System.Drawing.Size(100, 37);
             this.setNodeNumber.TabIndex = 18;
             this.setNodeNumber.Text = "Ustal numer węzła";
             this.setNodeNumber.UseVisualStyleBackColor = true;
@@ -306,19 +308,41 @@
             // 
             // chooseTextFile
             // 
-            this.chooseTextFile.Location = new System.Drawing.Point(227, 95);
+            this.chooseTextFile.Location = new System.Drawing.Point(12, 378);
             this.chooseTextFile.Name = "chooseTextFile";
-            this.chooseTextFile.Size = new System.Drawing.Size(97, 43);
+            this.chooseTextFile.Size = new System.Drawing.Size(153, 34);
             this.chooseTextFile.TabIndex = 34;
             this.chooseTextFile.Text = "Wybierz plik konfiguracyjny";
             this.chooseTextFile.UseVisualStyleBackColor = true;
             this.chooseTextFile.Click += new System.EventHandler(this.chooseTextFile_Click);
             // 
+            // saveConfigButton
+            // 
+            this.saveConfigButton.Location = new System.Drawing.Point(171, 377);
+            this.saveConfigButton.Name = "saveConfigButton";
+            this.saveConfigButton.Size = new System.Drawing.Size(163, 35);
+            this.saveConfigButton.TabIndex = 35;
+            this.saveConfigButton.Text = "Zapisz plik konfiguracyjny";
+            this.saveConfigButton.UseVisualStyleBackColor = true;
+            this.saveConfigButton.Click += new System.EventHandler(this.saveConfigButton_Click);
+            // 
+            // disconnectButton
+            // 
+            this.disconnectButton.Location = new System.Drawing.Point(224, 95);
+            this.disconnectButton.Name = "disconnectButton";
+            this.disconnectButton.Size = new System.Drawing.Size(100, 43);
+            this.disconnectButton.TabIndex = 36;
+            this.disconnectButton.Text = "Rozłącz";
+            this.disconnectButton.UseVisualStyleBackColor = true;
+            this.disconnectButton.Click += new System.EventHandler(this.disconnectButton_Click);
+            // 
             // Nodix
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(341, 377);
+            this.ClientSize = new System.Drawing.Size(341, 417);
+            this.Controls.Add(this.disconnectButton);
+            this.Controls.Add(this.saveConfigButton);
             this.Controls.Add(this.chooseTextFile);
             this.Controls.Add(this.addEntryButton);
             this.Controls.Add(this.outVCITextBox);
@@ -350,9 +374,9 @@
             this.Controls.Add(this.cloudIPLabel);
             this.Controls.Add(this.cloudIPField);
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(357, 415);
+            this.MaximumSize = new System.Drawing.Size(357, 455);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(357, 415);
+            this.MinimumSize = new System.Drawing.Size(357, 455);
             this.Name = "Nodix";
             this.Text = "Nodix";
             this.ResumeLayout(false);
@@ -392,6 +416,8 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button addEntryButton;
         private System.Windows.Forms.Button chooseTextFile;
+        private System.Windows.Forms.Button saveConfigButton;
+        private System.Windows.Forms.Button disconnectButton;
     }
 }
 
