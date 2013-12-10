@@ -431,14 +431,16 @@ namespace Nodix {
         }
 
         private void saveConfig() {
-            List<String> lines = new List<String>();
-            foreach (PortVPIVCI key in VCArray.Keys) {
-                PortVPIVCI value;
-                if (VCArray.TryGetValue(key, out value)) lines.Add("ADD " + key.port + " " + key.VPI + " " + key.VCI + 
-                                                                    " " + value.port + " " + value.VPI + " " + value.VCI);
-            }
-            System.IO.File.WriteAllLines("config"+nodeNumber+".txt", lines);
-            SetText("Zapisuję ustawienia do pliku config" + nodeNumber + ".txt\n");
+            if (nodeNumber != null) {
+                List<String> lines = new List<String>();
+                foreach (PortVPIVCI key in VCArray.Keys) {
+                    PortVPIVCI value;
+                    if (VCArray.TryGetValue(key, out value)) lines.Add("ADD " + key.port + " " + key.VPI + " " + key.VCI +
+                                                                        " " + value.port + " " + value.VPI + " " + value.VCI);
+                }
+                System.IO.File.WriteAllLines("config" + nodeNumber + ".txt", lines);
+                SetText("Zapisuję ustawienia do pliku config" + nodeNumber + ".txt\n");
+            } else SetText("Ustal numer węzła!\n");
         }
     }
 
