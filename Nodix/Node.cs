@@ -393,6 +393,7 @@ namespace Nodix {
         public void readConfig(String nNumber) {
             try {
                 nodeNumber = int.Parse(nNumber);
+                isNodeNumberSet = true;
                 NodeNumberField.Text = nodeNumber.ToString();
                 SetText("Ustalam numer węzła jako " + nodeNumber + "\n");
                 String path = "config" + nNumber + ".txt";
