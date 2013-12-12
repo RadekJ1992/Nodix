@@ -55,6 +55,7 @@
             this.chooseTextFile = new System.Windows.Forms.Button();
             this.saveConfigButton = new System.Windows.Forms.Button();
             this.disconnectButton = new System.Windows.Forms.Button();
+            this.printVCArrayButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cloudIPField
@@ -308,9 +309,9 @@
             // 
             // chooseTextFile
             // 
-            this.chooseTextFile.Location = new System.Drawing.Point(12, 378);
+            this.chooseTextFile.Location = new System.Drawing.Point(118, 377);
             this.chooseTextFile.Name = "chooseTextFile";
-            this.chooseTextFile.Size = new System.Drawing.Size(153, 34);
+            this.chooseTextFile.Size = new System.Drawing.Size(100, 34);
             this.chooseTextFile.TabIndex = 34;
             this.chooseTextFile.Text = "Wybierz plik konfiguracyjny";
             this.chooseTextFile.UseVisualStyleBackColor = true;
@@ -318,9 +319,9 @@
             // 
             // saveConfigButton
             // 
-            this.saveConfigButton.Location = new System.Drawing.Point(171, 377);
+            this.saveConfigButton.Location = new System.Drawing.Point(224, 377);
             this.saveConfigButton.Name = "saveConfigButton";
-            this.saveConfigButton.Size = new System.Drawing.Size(163, 35);
+            this.saveConfigButton.Size = new System.Drawing.Size(110, 35);
             this.saveConfigButton.TabIndex = 35;
             this.saveConfigButton.Text = "Zapisz plik konfiguracyjny";
             this.saveConfigButton.UseVisualStyleBackColor = true;
@@ -336,11 +337,22 @@
             this.disconnectButton.UseVisualStyleBackColor = true;
             this.disconnectButton.Click += new System.EventHandler(this.disconnectButton_Click);
             // 
+            // printVCArrayButton
+            // 
+            this.printVCArrayButton.Location = new System.Drawing.Point(12, 377);
+            this.printVCArrayButton.Name = "printVCArrayButton";
+            this.printVCArrayButton.Size = new System.Drawing.Size(100, 34);
+            this.printVCArrayButton.TabIndex = 37;
+            this.printVCArrayButton.Text = "Wyświetl tablicę kierowania";
+            this.printVCArrayButton.UseVisualStyleBackColor = true;
+            this.printVCArrayButton.Click += new System.EventHandler(this.printVCArrayButton_Click);
+            // 
             // Nodix
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(341, 417);
+            this.Controls.Add(this.printVCArrayButton);
             this.Controls.Add(this.disconnectButton);
             this.Controls.Add(this.saveConfigButton);
             this.Controls.Add(this.chooseTextFile);
@@ -379,6 +391,7 @@
             this.MinimumSize = new System.Drawing.Size(357, 455);
             this.Name = "Nodix";
             this.Text = "Nodix";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Nodix_FormClosed);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -418,6 +431,7 @@
         private System.Windows.Forms.Button chooseTextFile;
         private System.Windows.Forms.Button saveConfigButton;
         private System.Windows.Forms.Button disconnectButton;
+        private System.Windows.Forms.Button printVCArrayButton;
     }
 }
 

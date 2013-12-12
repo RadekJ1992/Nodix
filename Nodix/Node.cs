@@ -443,6 +443,18 @@ namespace Nodix {
                 SetText("Zapisuję ustawienia do pliku config" + nodeNumber + ".txt\n");
             } else SetText("Ustal numer węzła!\n");
         }
+
+        private void printVCArrayButton_Click(object sender, EventArgs e) {
+            foreach (PortVPIVCI key in VCArray.Keys) {
+                PortVPIVCI temp;
+                if (VCArray.TryGetValue(key, out temp))
+                SetText("[" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + temp.port + ";" + temp.VPI + ";" + temp.VCI + "]\n");
+            }
+        }
+
+        private void Nodix_FormClosed(object sender, FormClosedEventArgs e) {
+            if (nodeNumber != null) saveConfig();
+        }
     }
 
     class Agentix {
