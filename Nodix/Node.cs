@@ -217,7 +217,7 @@ namespace Nodix {
                     } else if (VCArray.ContainsKey(VPConKey)) {
                         if (VCArray.TryGetValue(VPConKey, out value)) {
 
-                            SetText("Przekierowywanie [" + processedPacket.port + ";" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + value.port + ";" + value.VPI + ";" + value.VCI + "]\n");
+                            SetText("Przekierowywanie [" + processedPacket.port + ";" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + value.port + ";" + value.VPI + ";" + processedPacket.VCI + "]\n");
                             processedPacket.VPI = value.VPI;
                             processedPacket.port = value.port;
                             // VCI bez zmian
