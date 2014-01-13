@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace TestSignalPacket 
-{
+{   
+    [Serializable]
     class SPacket : ISerializable
     {
         private string src;
@@ -30,8 +31,8 @@ namespace TestSignalPacket
         public SPacket(SerializationInfo info, StreamingContext ctxt)
         {
             //Get the values from info and assign them to the appropriate properties
-            src = (string)info.GetValue("src", typeof(int));
-            dest = (string)info.GetValue("dest", typeof(int));
+            src = (string)info.GetValue("src", typeof(string));
+            dest = (string)info.GetValue("dest", typeof(string));
             parames = (List<string>)info.GetValue("parames", typeof(List<string>));
             
         }
@@ -59,7 +60,7 @@ namespace TestSignalPacket
 
         public override string ToString()
         {
-            string result= "from: " + src + " to: " + dest + "params: ";
+            string result= "from: " + src + " to: " + dest + " params: ";
             for (int i = 0; i < parames.Count; i++ )
             {
                 result += parames.ElementAt(i) + " | ";
