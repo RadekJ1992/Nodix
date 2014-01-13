@@ -10,6 +10,8 @@ namespace TestSignalPacket
     {
         static void Main(string[] args)
         {
+            SPacket sp = new SPacket();
+            sp.setsrc
         }
     }
 }

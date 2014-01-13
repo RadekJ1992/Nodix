@@ -10,17 +10,17 @@ namespace TestSignalPacket
 {
     class SPacket : ISerializable
     {
-        private String src {get; set;}
-        private String dest { get; set; }
-        private List<String> parames { get; set; }
+        private String src;
+        private String dest;
+        private List<String> parames;
 
-        SPacket()
+        public SPacket()
         {
-            src = null;
-            dest = null;
-            parames = null;
+            src = "-";
+            dest = "-";
+            parames = new List<string>();
         }
-        SPacket(String s, String d, List<String> p)
+        public SPacket(String s, String d, List<String> p)
         {
             src = (String)s.Clone();
             dest = (String)d.Clone();
@@ -48,6 +48,29 @@ namespace TestSignalPacket
             }
                 return result;
         }
-
+        public String getSrc()
+        {
+            return this.src;
+        }
+        public void setSrc(String s)
+        {
+            this.src = s;
+        }
+        public String getDest()
+        {
+            return this.dest;
+        }
+        public void setDest(String d)
+        {
+            this.dest = d;
+        }
+        public List<String> getParames()
+        {
+            return this.parames;
+        }
+        public void setParames(List<String> AL)
+        {
+            this.parames = AL;
+        }
     }
 }
