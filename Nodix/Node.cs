@@ -284,6 +284,17 @@ namespace Nodix {
                 VCArray.Add(value, key);
             }
         }
+        //dodaje wpis w JEDNĄ stronę
+        public void addSingleEntry(PortVPIVCI key, PortVPIVCI value) {
+            if (VCArray.ContainsKey(key)) {
+                SetText("Zmieniam stary klucz VCArray na [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI + "]\n");
+                VCArray.Remove(key);
+                VCArray.Add(key, value);
+            } else {
+                SetText("Dodaję wpis [" + key.port + ";" + key.VPI + ";" + key.VCI + "] -> [" + value.port + ";" + value.VPI + ";" + value.VCI + "]\n");
+                VCArray.Add(key, value);
+            }
+        }
 
         //Dodaje pozycję do VCArray, pobiera inty jako poszczególne wartości
         //WAŻNE - dodaje wpis 'w jedna strone'
@@ -371,7 +382,7 @@ namespace Nodix {
             try {
                 PortVPIVCI inValue = new PortVPIVCI(int.Parse(inPortTextBox.Text), int.Parse(inVPITextBox.Text), int.Parse(inVCITextBox.Text));
                 PortVPIVCI outValue = new PortVPIVCI(int.Parse(outPortTextBox.Text), int.Parse(outVPITextBox.Text), int.Parse(outVCITextBox.Text));
-                addEntry(inValue, outValue);
+                addSingleEntry(inValue, outValue);
             } catch {}
             inPortTextBox.Clear();
             inVPITextBox.Clear();
@@ -498,7 +509,7 @@ namespace Nodix {
                             p2 = int.Parse(slowa[4]);
                             vp2 = int.Parse(slowa[5]);
                             vc2 = int.Parse(slowa[6]);
-                            parent.addEntry(p1, vp1, vc1, p2, vp2, vc2);
+                            parent.addSingleEntry(p1, vp1, vc1, p2, vp2, vc2);
                         }
                     } else if (slowa[0] == "DELETE") {
                         //usuwanie jednego wpisu
@@ -513,7 +524,7 @@ namespace Nodix {
                             p2 = int.Parse(slowa[4]);
                             vp2 = int.Parse(slowa[5]);
                             vc2 = int.Parse(slowa[6]);
-                            parent.removeEntry(p1, vp1, vc1);
+                            parent.removeSingleEntry(p1, vp1, vc1);
                            // parent.removeEntry(p2, vp2, vc1);
 
                         }
