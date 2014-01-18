@@ -147,10 +147,6 @@ namespace Nodix {
             
         }
 
-        public void Enqueue(ATMPacket Packet) {
-            queuedReceivedPackets.Enqueue(Packet);
-        }
-
         private void receiver() {
             if (networkStream == null) {
                 networkStream = new NetworkStream(cloudSocket);
