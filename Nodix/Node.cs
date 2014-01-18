@@ -28,7 +28,7 @@ namespace Nodix {
         private bool isNodeNumberSet;
 
         //kolejka pakietów odebranych z chmury - concurrentQueue jest thread-safe, zwykła queue nie
-        private ConcurrentQueue<Packet.ATMPacket> queuedReceivedPackets = new ConcurrentQueue<Packet.ATMPacket>();
+        public ConcurrentQueue<Packet.ATMPacket> queuedReceivedPackets = new ConcurrentQueue<Packet.ATMPacket>();
 
         //dane chmury
         private IPAddress cloudAddress;        //Adres na którym chmura nasłuchuje
