@@ -62,6 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="eLReMix.cs" />
     <Compile Include="Node.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -113,6 +114,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\AddressLibrary\AddressLibrary\AddressLibrary.csproj">
+      <Project>{791d4070-60e5-4d4a-8f62-d33608c690b8}</Project>
+      <Name>AddressLibrary</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Packet\ClassLibrary1\Packet.csproj">
       <Project>{7c42f514-ea47-44c9-ad87-8fafc77521dc}</Project>
       <Name>Packet</Name>

@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Packet;
 using System.IO;
+using AddressLibrary;
 
 namespace Nodix {
     public partial class Nodix : Form {
@@ -24,8 +25,10 @@ namespace Nodix {
         private Packet.ATMPacket processedPacket;
 
         //unikalny numer danego węzła
-        public int nodeNumber { get; set; }
-        private bool isNodeNumberSet;
+        //public int nodeNumber { get; set; }
+        private bool isNodeAddressSet;
+
+        public Address myAddress {get; set;}
 
         //kolejka pakietów odebranych z chmury - concurrentQueue jest thread-safe, zwykła queue nie
         public ConcurrentQueue<Packet.ATMPacket> queuedReceivedPackets = new ConcurrentQueue<Packet.ATMPacket>();
@@ -74,13 +77,13 @@ namespace Nodix {
 
         public Nodix() {
             InitializeComponent();
-            isNodeNumberSet = false;
+            isNodeAddressSet = false;
             isLoggedToManager = false;
             isDisconnect = false;
         }
 
         private void connectToCloud(object sender, EventArgs e) {
-            if (isNodeNumberSet) {
+            if (isNodeAddressSet) {
                 if (!isConnectedToCloud) {
                     if (IPAddress.TryParse(cloudIPField.Text, out cloudAddress)) {
                         log.AppendText("IP ustawiono jako " + cloudAddress.ToString() + " \n");
@@ -112,7 +115,7 @@ namespace Nodix {
         }
 
         private void connectToManager(object sender, EventArgs e) {
-            if (isNodeNumberSet) {
+            if (isNodeAddressSet) {
                 if (!isConnectedToManager) {
                     if (IPAddress.TryParse(managerIPField.Text, out managerAddress)) {
                         log.AppendText("IP zarządcy ustawione jako " + managerAddress.ToString() + " \n");
@@ -152,7 +155,7 @@ namespace Nodix {
                 networkStream = new NetworkStream(cloudSocket);
                 
                 //tworzy string 'Node ' i tu jego numer
-                String welcomeString = "Node " + nodeNumber;
+                String welcomeString = "Node " + myAddress.ToString();
                 //tworzy tablicę bajtów z tego stringa
                 byte[] welcomeStringBytes = AAL.GetBytesFromString(welcomeString);
                 //wysyła tą tablicę bajtów streamem
@@ -390,12 +393,15 @@ namespace Nodix {
 
         private void setNodeNumber_Click(object sender, EventArgs e) {
             try {
-                nodeNumber = int.Parse(NodeNumberField.Text);
-                isNodeNumberSet = true;
-                SetText("Numer węzła ustawiony jako " + nodeNumber + "\n");
+                int nodeAddressNetwork = int.Parse(NodeNetworkNumberField.Text);
+                int nodeAddressSubnet = int.Parse(NodeSubnetworkNumberField.Text);
+                int nodeAddressHost = int.Parse(NodeHostNumberField.Text);
+                isNodeAddressSet = true;
+                myAddress = new Address(nodeAddressNetwork, nodeAddressSubnet, nodeAddressHost);
+                SetText("Numer węzła ustawiony jako " + myAddress.ToString() + "\n");
             } catch {
-                isNodeNumberSet = false;
-                SetText("Numer węzła musi być NUMEREM!\n");
+                isNodeAddressSet = false;
+                SetText("Błędne dane wejściowe\n");
             }
         }
 
@@ -422,13 +428,15 @@ namespace Nodix {
             }
         }
 
-        public void readConfig(String nNumber) {
+        public void readConfig(String nAddr) {
             try {
-                nodeNumber = int.Parse(nNumber);
-                isNodeNumberSet = true;
-                NodeNumberField.Text = nodeNumber.ToString();
-                SetText("Ustalam numer węzła jako " + nodeNumber + "\n");
-                String path = "config" + nNumber + ".txt";
+                myAddress = Address.Parse(nAddr);
+                isNodeAddressSet = true;
+                NodeNetworkNumberField.Text = String.Empty + myAddress.network;
+                NodeSubnetworkNumberField.Text = String.Empty + myAddress.subnet;
+                NodeHostNumberField.Text = String.Empty + myAddress.host;
+                SetText("Ustalam adres węzła jako " + myAddress.ToString() + "\n");
+                String path = "config" + nAddr + ".txt";
                 using (StreamReader sr = new StreamReader(path)) {
                     string[] lines = System.IO.File.ReadAllLines(path);
                     foreach (String line in lines) {
@@ -464,16 +472,16 @@ namespace Nodix {
         }
 
         private void saveConfig() {
-            if (nodeNumber != null) {
+            if (myAddress != null) {
                 List<String> lines = new List<String>();
                 foreach (PortVPIVCI key in VCArray.Keys) {
                     PortVPIVCI value;
                     if (VCArray.TryGetValue(key, out value)) lines.Add("ADD " + key.port + " " + key.VPI + " " + key.VCI +
                                                                         " " + value.port + " " + value.VPI + " " + value.VCI);
                 }
-                System.IO.File.WriteAllLines("config" + nodeNumber + ".txt", lines);
-                SetText("Zapisuję ustawienia do pliku config" + nodeNumber + ".txt\n");
-            } else SetText("Ustal numer węzła!\n");
+                System.IO.File.WriteAllLines("config" + myAddress.ToString() + ".txt", lines);
+                SetText("Zapisuję ustawienia do pliku config" + myAddress.ToString() + ".txt\n");
+            } else SetText("Ustal adres węzła!\n");
         }
 
         private void printVCArrayButton_Click(object sender, EventArgs e) {
@@ -485,7 +493,7 @@ namespace Nodix {
         }
 
         private void Nodix_FormClosed(object sender, FormClosedEventArgs e) {
-            if (nodeNumber != null) saveConfig();
+            if (myAddress != null) saveConfig();
         }
     }
 
@@ -595,7 +603,7 @@ namespace Nodix {
             while (parent.isConnectedToManager) {
                 try {
                     if (sendLoginT) {
-                        write.WriteLine("LOGINT\n" + parent.nodeNumber);
+                        write.WriteLine("LOGINT\n" + parent.myAddress.ToString());
                         write.Flush();
                         sendLoginT = false;
                     }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodix", "Nodix\Nodix.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Packet", "..\Packet\ClassLibrary1\Packet.csproj", "{7C42F514-EA47-44C9-AD87-8FAFC77521DC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddressLibrary", "..\AddressLibrary\AddressLibrary\AddressLibrary.csproj", "{791D4070-60E5-4D4A-8F62-D33608C690B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7C42F514-EA47-44C9-AD87-8FAFC77521DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C42F514-EA47-44C9-AD87-8FAFC77521DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C42F514-EA47-44C9-AD87-8FAFC77521DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{791D4070-60E5-4D4A-8F62-D33608C690B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{791D4070-60E5-4D4A-8F62-D33608C690B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{791D4070-60E5-4D4A-8F62-D33608C690B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{791D4070-60E5-4D4A-8F62-D33608C690B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

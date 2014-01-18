@@ -37,7 +37,7 @@
             this.log = new System.Windows.Forms.TextBox();
             this.setNodeNumber = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
-            this.NodeNumberField = new System.Windows.Forms.TextBox();
+            this.NodeNetworkNumberField = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -57,6 +57,8 @@
             this.saveConfigButton = new System.Windows.Forms.Button();
             this.disconnectButton = new System.Windows.Forms.Button();
             this.printVCArrayButton = new System.Windows.Forms.Button();
+            this.NodeSubnetworkNumberField = new System.Windows.Forms.TextBox();
+            this.NodeHostNumberField = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // cloudIPField
@@ -173,16 +175,16 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(224, 13);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(73, 13);
+            this.label2.Size = new System.Drawing.Size(69, 13);
             this.label2.TabIndex = 15;
-            this.label2.Text = "Numer Węzła";
+            this.label2.Text = "Adres Węzła";
             // 
-            // NodeNumberField
+            // NodeNetworkNumberField
             // 
-            this.NodeNumberField.Location = new System.Drawing.Point(224, 29);
-            this.NodeNumberField.Name = "NodeNumberField";
-            this.NodeNumberField.Size = new System.Drawing.Size(100, 20);
-            this.NodeNumberField.TabIndex = 14;
+            this.NodeNetworkNumberField.Location = new System.Drawing.Point(224, 29);
+            this.NodeNetworkNumberField.Name = "NodeNetworkNumberField";
+            this.NodeNetworkNumberField.Size = new System.Drawing.Size(27, 20);
+            this.NodeNetworkNumberField.TabIndex = 14;
             // 
             // label1
             // 
@@ -348,11 +350,27 @@
             this.printVCArrayButton.UseVisualStyleBackColor = true;
             this.printVCArrayButton.Click += new System.EventHandler(this.printVCArrayButton_Click);
             // 
+            // NodeSubnetworkNumberField
+            // 
+            this.NodeSubnetworkNumberField.Location = new System.Drawing.Point(257, 29);
+            this.NodeSubnetworkNumberField.Name = "NodeSubnetworkNumberField";
+            this.NodeSubnetworkNumberField.Size = new System.Drawing.Size(27, 20);
+            this.NodeSubnetworkNumberField.TabIndex = 38;
+            // 
+            // NodeHostNumberField
+            // 
+            this.NodeHostNumberField.Location = new System.Drawing.Point(290, 29);
+            this.NodeHostNumberField.Name = "NodeHostNumberField";
+            this.NodeHostNumberField.Size = new System.Drawing.Size(34, 20);
+            this.NodeHostNumberField.TabIndex = 39;
+            // 
             // Nodix
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(341, 417);
+            this.Controls.Add(this.NodeHostNumberField);
+            this.Controls.Add(this.NodeSubnetworkNumberField);
             this.Controls.Add(this.printVCArrayButton);
             this.Controls.Add(this.disconnectButton);
             this.Controls.Add(this.saveConfigButton);
@@ -374,7 +392,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.setNodeNumber);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.NodeNumberField);
+            this.Controls.Add(this.NodeNetworkNumberField);
             this.Controls.Add(this.log);
             this.Controls.Add(this.connectToManagerButton);
             this.Controls.Add(this.connectToCloudButton);
@@ -414,7 +432,7 @@
         private System.Windows.Forms.TextBox log;
         private System.Windows.Forms.Button setNodeNumber;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox NodeNumberField;
+        private System.Windows.Forms.TextBox NodeNetworkNumberField;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
@@ -434,6 +452,8 @@
         private System.Windows.Forms.Button saveConfigButton;
         private System.Windows.Forms.Button disconnectButton;
         private System.Windows.Forms.Button printVCArrayButton;
+        private System.Windows.Forms.TextBox NodeSubnetworkNumberField;
+        private System.Windows.Forms.TextBox NodeHostNumberField;
     }
 }
 

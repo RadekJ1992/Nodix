@@ -30,7 +30,7 @@ namespace Nodix
         {
             //wysyła do wszystkich sąsiadów z listy odpowiednie wiadomosci
             byte[] payload={new byte()};
-            parent.queuedReceivedPackets.Enqueue(new Packet.ATMPacket(Packet.ATMPacket.AALType.SSM, payload, 0,0);
+            parent.queuedReceivedPackets.Enqueue(new Packet.ATMPacket(Packet.ATMPacket.AALType.SSM, payload, 0,0));
         }
         public void wyslijSPacket(Packet.SPacket cos)
         {
