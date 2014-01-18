@@ -161,11 +161,23 @@ namespace Nodix {
             BinaryFormatter bf = new BinaryFormatter();
             try {
                 receivedPacket = (Packet.ATMPacket)bf.Deserialize(networkStream);
-                queuedReceivedPackets.Enqueue(receivedPacket);
-            sendThread = new Thread(this.sender);
-            sendThread.IsBackground = true;
-            sendThread.Start();
-            receiver();
+                if (receivedPacket.VPI == -1 && receivedPacket.VCI == -1) {
+                    //WYŚLIJ DO LRM
+
+
+
+
+
+                }
+                else queuedReceivedPackets.Enqueue(receivedPacket);
+
+                //to może nie działać. Sprawdzi się jeszcze
+                if (!sendThread.IsAlive) {
+                    sendThread = new Thread(this.sender);
+                    sendThread.IsBackground = true;
+                    sendThread.Start();
+                    receiver();
+                }
             } catch (Exception e) {
                 if (isDisconnect) { SetText("Rozłączam się z chmurą!\n"); isDisconnect = false; networkStream = null; }
                 else { SetText("Coś poszło nie tak : " + e.Message + "\n"); }
@@ -202,6 +214,12 @@ namespace Nodix {
                     VPConKey.VPI = processedPacket.VPI;
                     VPConKey.VCI = 0;
                     NetworkStream networkStream = new NetworkStream(cloudSocket);
+                    if (processedPacket.VPI == -1 && processedPacket.VCI == -1) {
+                        SetText("Wysyłam pakiet sygnalizacyjny na porcie " + processedPacket.port + "\n");
+                        BinaryFormatter bformatter = new BinaryFormatter();
+                        bformatter.Serialize(networkStream, processedPacket);
+                        networkStream.Close();
+                    }
                     if (VCArray.ContainsKey(VCConKey)) {
                         if (VCArray.TryGetValue(VCConKey, out value)) {
                             SetText("Przekierowywanie [" + processedPacket.port + ";" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + value.port + ";" + value.VPI + ";" + value.VCI + "]\n");
@@ -230,8 +248,11 @@ namespace Nodix {
                     } else {
                         SetText("Pakiet stracony - brak odpowiedniego wpisu w tablicy\n");
                     }
+
+
                 }
             }
+            sender();
         }
 
         //Dodaje pozycję do VCArray, pobiera dwa obiekty PortVPIVCI
