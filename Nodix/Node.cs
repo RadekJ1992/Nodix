@@ -63,7 +63,8 @@ namespace Nodix {
 
         //agent zarządzania
         private Agentix agent;
-
+        //LRM
+        private eLReMix lrm;//jeszcze kwestia jak go podłączyć w konstruktorze czy tworzyć go potem przy kliknięciu połącz
         // tablica kierowania
         // UWAGA!
 
