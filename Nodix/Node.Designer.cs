@@ -178,6 +178,7 @@
             this.label2.Size = new System.Drawing.Size(69, 13);
             this.label2.TabIndex = 15;
             this.label2.Text = "Adres Węzła";
+            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // NodeNetworkNumberField
             // 
@@ -185,6 +186,7 @@
             this.NodeNetworkNumberField.Name = "NodeNetworkNumberField";
             this.NodeNetworkNumberField.Size = new System.Drawing.Size(27, 20);
             this.NodeNetworkNumberField.TabIndex = 14;
+            this.NodeNetworkNumberField.TextChanged += new System.EventHandler(this.NodeNetworkNumberField_TextChanged);
             // 
             // label1
             // 
@@ -356,6 +358,7 @@
             this.NodeSubnetworkNumberField.Name = "NodeSubnetworkNumberField";
             this.NodeSubnetworkNumberField.Size = new System.Drawing.Size(27, 20);
             this.NodeSubnetworkNumberField.TabIndex = 38;
+            this.NodeSubnetworkNumberField.TextChanged += new System.EventHandler(this.NodeSubnetworkNumberField_TextChanged);
             // 
             // NodeHostNumberField
             // 
@@ -363,6 +366,7 @@
             this.NodeHostNumberField.Name = "NodeHostNumberField";
             this.NodeHostNumberField.Size = new System.Drawing.Size(34, 20);
             this.NodeHostNumberField.TabIndex = 39;
+            this.NodeHostNumberField.TextChanged += new System.EventHandler(this.NodeHostNumberField_TextChanged);
             // 
             // Nodix
             // 

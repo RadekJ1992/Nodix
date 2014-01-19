@@ -495,6 +495,22 @@ namespace Nodix {
         private void Nodix_FormClosed(object sender, FormClosedEventArgs e) {
             if (myAddress != null) saveConfig();
         }
+
+        private void NodeSubnetworkNumberField_TextChanged(object sender, EventArgs e) {
+
+        }
+
+        private void NodeHostNumberField_TextChanged(object sender, EventArgs e) {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e) {
+
+        }
+
+        private void NodeNetworkNumberField_TextChanged(object sender, EventArgs e) {
+
+        }
     }
 
     class Agentix {
