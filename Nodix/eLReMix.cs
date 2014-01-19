@@ -25,14 +25,19 @@ namespace Nodix
             //obsługa pakietu od innego LRMa
             int port = pkt.port;
             byte[] payload = pkt.payload;
+            string result = System.Text.Encoding.UTF8.GetString(payload);
+            AddressLibrary.Address adres = AddressLibrary.Address.Parse(result);
+            //rozczytanie komendy i dalsze działania, w tym wysyłanie do RC
         }
         public void Spamuj()
         {
+            AddressLibrary.Address adres = parent.myAddress;
+            String adr = adres.ToString();
             //wysyła do wszystkich sąsiadów z listy odpowiednie wiadomosci do LRMów
             for (int i = 0; i < klienty.Count;i++ )
             {
 
-                String str = "";
+                String str = "IAM "+adres.ToString();/////ogarnać tekst zgodnie z protokołem
                 byte[] payload = new byte[str.Length * sizeof(char)];
                 System.Buffer.BlockCopy(str.ToCharArray(), 0, payload, 0, payload.Length);
                 Packet.ATMPacket packiet = new Packet.ATMPacket(Packet.ATMPacket.AALType.SSM, payload, 0, 0);
@@ -42,9 +47,13 @@ namespace Nodix
                 parent.queuedReceivedPackets.Enqueue(packiet);
             }
         }
-        public void wyslijSPacket(Packet.SPacket cos)
+        public void wyslijSPacket(Packet.SPacket cos)//wysyłanie przez chmurę kablową
         {
             
+        }
+        public void OdczytajSPacket(Packet.SPacket cos)//odbieranie z chmury kablowej
+        {
+
         }
         
     }
