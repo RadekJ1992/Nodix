@@ -49,11 +49,11 @@ namespace Nodix
         }
         public void wyslijSPacket(Packet.SPacket cos)//wysyłanie przez chmurę kablową
         {
-            
+            //w Nodixie będzie kolejka public whatToSendQueue, musisz tylko stworzyć pakiet i zrobić parent.whatToSendQueue.Enquque(packet)
         }
         public void OdczytajSPacket(Packet.SPacket cos)//odbieranie z chmury kablowej
         {
-
+            //w nodixie będzie atuomatycznie przekazywać odebrane pakiety tutaj. Obrabiaj je sobie jak Ci pasuje
         }
         
     }
