@@ -21,7 +21,7 @@ namespace Nodix {
     public partial class Nodix : Form {
         delegate void SetTextCallback(string text);
 
-        private class Route {
+        public class Route {
             public Address destAddr;
             public int bandwidth;
             public int port;
@@ -627,7 +627,7 @@ namespace Nodix {
         /// <summary>
         /// wątek wysyłający wiadomości do chmury
         /// </summary>
-        public void sender() {
+        public void controlSender() {
             while (isConnectedToCloud) {
                 //jeśli coś jest w kolejce - zdejmij i wyślij
                 if (whatToSendQueue.Count != 0) {
