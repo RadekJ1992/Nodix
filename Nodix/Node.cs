@@ -20,6 +20,18 @@ namespace Nodix {
     public partial class Nodix : Form {
         delegate void SetTextCallback(string text);
 
+        private class Route {
+            public Address destAddr;
+            public int bandwidth;
+            public int port;
+
+            public Route(Address addr, int band, int port) {
+                destAddr = addr;
+                bandwidth = band;
+                this.port = port;
+            }
+        }
+
         //otrzymany i wysyłany pakiets
         private Packet.ATMPacket receivedPacket;
         private Packet.ATMPacket processedPacket;
@@ -65,6 +77,8 @@ namespace Nodix {
         private Agentix agent;
         //LRM
         private eLReMix lrm;//jeszcze kwestia jak go podłączyć w konstruktorze czy tworzyć go potem przy kliknięciu połącz
+
+        public List<Route> routeList;
         // tablica kierowania
         // UWAGA!
 
@@ -81,6 +95,7 @@ namespace Nodix {
             isNodeAddressSet = false;
             isLoggedToManager = false;
             isDisconnect = false;
+            routeList = new List<Route>();
         }
 
         private void connectToCloud(object sender, EventArgs e) {
@@ -451,6 +466,17 @@ namespace Nodix {
                             }
                         } else if (command[0] == "CLEAR") {
                             clearTable();
+                        } else if (command[0] == "ADD_ROUTE") {
+                            Address adr;
+                            int port;
+                            int band;
+                            if (int.TryParse(command[1], out port)) {
+                                if (Address.TryParse(command[2], out adr)) {
+                                    if (int.TryParse(command[3], out band)) {
+                                        routeList.Add(new Route(adr,band,port);
+                                    } else SetText("Zły format danych\n");
+                                }else SetText("Zły format danych\n");
+                            }else SetText("Zły format danych\n");
                         }
                     }
                 }
