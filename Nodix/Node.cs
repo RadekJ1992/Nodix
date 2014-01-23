@@ -641,6 +641,7 @@ namespace Nodix {
                         argsToShow += str + " ";
                     }
                     SetText("Wysłano: " + _pck.getSrc() + ":" + _pck.getDest() + ":" + argsToShow + "\n");
+                    Thread.Sleep(50);
                 }
             }
         }
