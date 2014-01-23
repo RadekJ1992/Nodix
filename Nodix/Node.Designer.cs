@@ -375,7 +375,7 @@
             this.controlCloudPortTextBox.Name = "controlCloudPortTextBox";
             this.controlCloudPortTextBox.Size = new System.Drawing.Size(117, 20);
             this.controlCloudPortTextBox.TabIndex = 44;
-            this.controlCloudPortTextBox.Text = "13000";
+            this.controlCloudPortTextBox.Text = "14000";
             // 
             // portLabel
             // 
