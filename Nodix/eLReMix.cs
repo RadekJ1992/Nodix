@@ -14,12 +14,12 @@ namespace Nodix
 {
     class eLReMix
     {
-        Nodix parent;
-        Thread atm,s;
-        private ConcurrentQueue<Packet.ATMPacket> kolejkapyt;
-        private List<Packet.ATMPacket> kolejkaodp;
-        private ConcurrentQueue<Packet.SPacket> kolejkaS;
-        String adresLRM, adresRC;
+        Nodix parent;//coby móc krozystać z routelist i metod
+        Thread atm,s;//wątki do odbierania
+        private ConcurrentQueue<Packet.ATMPacket> kolejkapyt;//kolejka zapytań pakietów ATM z vpi vci -1
+        private List<Packet.ATMPacket> kolejkaodp;//kolejka odp od LRMów sąsiadów, używana w CzyZyje
+        private ConcurrentQueue<Packet.SPacket> kolejkaS;//kolejka SPacketów do wątku s
+        String adresLRM, adresRC;//lokalne kopie, coby nie szukać za długo
 
         public eLReMix(Nodix nod)
         {
@@ -38,7 +38,7 @@ namespace Nodix
             s.IsBackground = true;
             s.Start();
             //logowanie
-            wyslijSPacket(new SPacket(adresLRM, adresRC, "HELLO "+adresLRM));
+            wyslijSPacket(new SPacket(adresLRM, adresRC, "HELLO "+adresLRM));//logowanie do RC
 
         }
         #region wątki czytające SPackety i ATMPackety z kolejek
@@ -92,16 +92,16 @@ namespace Nodix
                     if(komenda.Equals("IS_ALIVE"))//to jest do do wysyłania pakietu próbnego do sąsiada o zadanym adresie np. IS_ALIVE 1.2.3
                     {
                         Address sprawdzany = Address.Parse(pakiet.getParames().ElementAt(1));
-                        CzyZyjeRun(sprawdzany);
+                        CzyZyjeRun(sprawdzany);//odpowiedzią zajmuje się metoda CzyZyje
                     }
                     else if (komenda.Equals("IS_LINK_AVAILABLE"))
                     {
                         Address sprawdzany = Address.Parse(pakiet.getParames().ElementAt(1));
                         for(int i=0; i<parent.routeList.Count;i++)
                         {
-                            if(sprawdzany.Equals(parent.routeList.ElementAt(i).destAddr))
+                            if(sprawdzany.Equals(parent.routeList.ElementAt(i).destAddr))//szukamy na routelist zadanego adresu
                             {
-                                if(parent.routeList.ElementAt(i).bandwidth>=2)
+                                if(parent.routeList.ElementAt(i).bandwidth>=2)//gdy przepustowość co najmniej 2 to ok
                                 {
                                     nowakomenda = "YES_AVAILABLE " + sprawdzany.ToString();
                                     break;
@@ -167,7 +167,7 @@ namespace Nodix
                     {
 
                     }*/
-                    pakiet.Swap(nowakomenda);
+                    pakiet.Swap(nowakomenda);//metoda zamienia src i dest i ustawia nowe parames
                     wyslijSPacket(pakiet);
                 }
                 catch (Exception e)
@@ -294,14 +294,14 @@ namespace Nodix
             int result=0;
             for (int i = 0; i < parent.routeList.Count; i++)
             {
-                if (parent.routeList.ElementAt(i).Equals(a1) || parent.routeList.ElementAt(i).Equals(a2))
+                if (parent.routeList.ElementAt(i).Equals(a1) || parent.routeList.ElementAt(i).Equals(a2))//przeszukuje całą listę w poszukiwaniu zadanych adresów
                 {
-                    parent.routeList.ElementAt(i).bandwidth += 2;
+                    parent.routeList.ElementAt(i).bandwidth += 2;//zwalnianie zasobów
                     result++;
                 }
                 
             }
-            if (result == 2)
+            if (result == 2)//gdy oba uda się zwolnić to sukces
                 return true;
             else
                 return false;
@@ -311,29 +311,30 @@ namespace Nodix
             int result = 0;
             for (int i = 0; i < parent.routeList.Count; i++)
             {
-                if (parent.routeList.ElementAt(i).Equals(a1) || parent.routeList.ElementAt(i).Equals(a2))
+                if (parent.routeList.ElementAt(i).Equals(a1) || parent.routeList.ElementAt(i).Equals(a2))//przeszukuję całą listę
                 {
                     if (parent.routeList.ElementAt(i).bandwidth<2)
                     {
                         break;
                     }
-                    parent.routeList.ElementAt(i).bandwidth -= 2;
+                    parent.routeList.ElementAt(i).bandwidth -= 2;//zajmuje zasób
                     result++;
                 }
 
             }
-            if (result == 2)
+            if (result == 2)//gdy oba uda się zająć to sukces
                 return true;
             else
                 return false;
         }
         #endregion
-        public int AddressToPort(String S)
+        #region konwersja Address<=>port
+        public int AddressToPort(String S)//konwersja adresu zapisanego w stringu na przypisany mu port w routelist
         {
             Address spr = Address.Parse(S);
             return AddressToPort(spr);
         }
-        public Address PortToAddress(int port)
+        public Address PortToAddress(int port)///zamiana portu na przypisany mu adres
         {
             Address result = null;
             for(int i=0; i<parent.routeList.Count;i++)
@@ -345,7 +346,7 @@ namespace Nodix
             }
             return result;
         }
-        public int AddressToPort(Address sprawdzany)
+        public int AddressToPort(Address sprawdzany)//konwersja adresu na przypisany mu port w routelist
         {
             int port = 0;
             for (int i = 0; i < parent.routeList.Count; i++)
@@ -358,5 +359,6 @@ namespace Nodix
             }
             return port;
         }
+        #endregion
     }
 }
