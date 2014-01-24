@@ -14,21 +14,27 @@ namespace Nodix
     class eLReMix
     {
         Nodix parent;
-        Thread atm;
+        Thread atm,s;
         private ConcurrentQueue<Packet.ATMPacket> kolejkapyt;
         private ConcurrentQueue<Packet.ATMPacket> kolejkaodp;
+        private ConcurrentQueue<Packet.SPacket> kolejkaS;
 
-        public eLReMix(Nodix nod)//ustawienie parenta
+        public eLReMix(Nodix nod)
         {
             parent = nod;
             kolejkapyt = new ConcurrentQueue<Packet.ATMPacket>();
             kolejkaodp = new ConcurrentQueue<Packet.ATMPacket>();
+            kolejkaS = new ConcurrentQueue<SPacket>();
             atm = new Thread(new ThreadStart(ATMReader));
             atm.IsBackground = true;
             atm.Start();
+            s = new Thread(new ThreadStart(SReader));
+            s.IsBackground = true;
+            s.Start();
+
         }
         
-        public void ATMReader()
+        public void ATMReader()//wątek obsługujący odczytywanie pakietów z zapytaniami, te z odpowiedziami będą jakoś(jeszcze nie wiem jak) obsługiwane w CzyZyje
         {
             while (true)
             {
@@ -39,33 +45,51 @@ namespace Nodix
                 }
                 try
                 {
-                    ATMPacket pckt;
-                    kolejkapyt.TryDequeue(out pckt);
+                    ATMPacket zapytanie, odpowiedz;
+                    kolejkapyt.TryDequeue(out zapytanie);
                     //obsługa pakietu od innego LRMa, w tej metodzie interesują nas tylko wiadomosci z zapytaniem, odpowiedzi obsługiwane są metodą CzyZyje
                     //więc jak wykryjemy odp to idzie do drugiej kolejki
-                    int port = pkt.port;
-                    byte[] payload = pkt.payload;
-                    string result = System.Text.Encoding.UTF8.GetString(payload);
-                    AddressLibrary.Address adres = AddressLibrary.Address.Parse(result);
-                    if (result.Equals("ZYJESZ?"))//zidentyfikowano wartość
-                    {
-
-                    }
-                    //rozczytanie komendy i dalsze działania, w tym wysyłanie do RC 
+                    byte[] payload = ToPayload("ZYJE");
+                    odpowiedz = new Packet.ATMPacket(Packet.ATMPacket.AALType.SSM, payload, 0, 0);
+                    odpowiedz.port = zapytanie.port;
+                    odpowiedz.VCI = -1;
+                    odpowiedz.VPI = -1;
+                    parent.queuedReceivedPackets.Enqueue(odpowiedz);
                 }
-                catch
+                catch(Exception e)
+                {
+                    Console.Out.WriteLine(e.Message);
+                }
+            }
+        }
+        public void SReader()
+        {
+            while (true)
+            {
+                if (kolejkaS.Count == 0)
+                {
+                    Thread.Sleep(50);
+                    continue;
+                }
+                try
                 {
 
+                }
+                catch (Exception e)
+                {
+                    Console.Out.WriteLine(e.Message);
                 }
             }
         }
 
-        public void KolejkujPakiet(Packet.ATMPacket pkt)//każdy pakiet, od razu rozpoznaje rodzaj - czy zapytanie czy odpowiedź, innych nie powinno być, najwyzej przepadną
+        public void OdczytajATM(Packet.ATMPacket pkt)//każdy pakiet, od razu rozpoznaje rodzaj - czy zapytanie czy odpowiedź, innych nie powinno być, najwyzej przepadną, dodawanie do dobrej kolejki
         {
             String tresc = this.FromPayload(pkt.payload);
-            if(tresc.Equals("ZYJESZ?"))
+            if (tresc.Equals("ZYJESZ?"))
+            {
                 kolejkapyt.Enqueue(pkt);
-            else if(tresc.Equals("ZYJE"))
+            }
+            else if (tresc.Equals("ZYJE"))
             {
                 kolejkaodp.Enqueue(pkt);
             }
@@ -98,11 +122,11 @@ namespace Nodix
         }
         public void wyslijSPacket(Packet.SPacket cos)//wysyłanie przez chmurę kablową
         {
-            //w Nodixie będzie kolejka public whatToSendQueue, musisz tylko stworzyć pakiet i zrobić parent.whatToSendQueue.Enquque(packet)
+            parent.whatToSendQueue.Enqueue(cos);
         }
-        public void OdczytajSPacket(Packet.SPacket cos)//odbieranie z chmury kablowej
+        public void OdczytajS(Packet.SPacket cos)//odbieranie z chmury kablowej
         {
-            //w nodixie będzie atuomatycznie przekazywać odebrane pakiety tutaj. Obrabiaj je sobie jak Ci pasuje
+            kolejkaS.Enqueue(cos);
         }
         public byte[] ToPayload(String str)
         {
