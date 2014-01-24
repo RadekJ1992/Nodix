@@ -8,6 +8,7 @@ using AddressLibrary;
 using Packet;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Nodix
 {
@@ -16,14 +17,17 @@ namespace Nodix
         Nodix parent;
         Thread atm,s;
         private ConcurrentQueue<Packet.ATMPacket> kolejkapyt;
-        private ConcurrentQueue<Packet.ATMPacket> kolejkaodp;
+        private List<Packet.ATMPacket> kolejkaodp;
         private ConcurrentQueue<Packet.SPacket> kolejkaS;
+        String adresLRM, adresRC;
 
         public eLReMix(Nodix nod)
         {
             parent = nod;
+            adresLRM = nod.myAddress.ToString();
+            adresRC = null;
             kolejkapyt = new ConcurrentQueue<Packet.ATMPacket>();
-            kolejkaodp = new ConcurrentQueue<Packet.ATMPacket>();
+            kolejkaodp = new List<Packet.ATMPacket>();
             kolejkaS = new ConcurrentQueue<SPacket>();
             atm = new Thread(new ThreadStart(ATMReader));
             atm.IsBackground = true;
@@ -73,7 +77,8 @@ namespace Nodix
                 }
                 try
                 {
-
+                    //przy przyjściu jakiejkolwiek wiadomości od RC wstawić jej adres do pola adresRC
+                    //tu zrobić rozpoznawanie wszystkich możliwych wiadomosci i ich obsługę
                 }
                 catch (Exception e)
                 {
@@ -91,13 +96,23 @@ namespace Nodix
             }
             else if (tresc.Equals("ZYJE"))
             {
-                kolejkaodp.Enqueue(pkt);
+                kolejkaodp.Add(pkt);
             }
+           
         }
-        public void CzyZyje(Address sprawdzany)//pod dany adres (jaqk istnieje) wysyłamy ATMPacket z wiadomością ZYJESZ
+
+        public void CzyZyjeRun(Address sprawdzany)//dla każdego zapytania o sprawność łącza od RC odpalany nowy wątek tą metodą
+        {
+            new Thread(new ParameterizedThreadStart(_CzyZyje));
+            s.IsBackground = true;
+            s.Start(sprawdzany);
+        }
+
+        
+        private void _CzyZyje(Object sprawdzanyy)//pod dany adres (jaqk istnieje) wysyłamy ATMPacket z wiadomością ZYJESZ
         {
             int port=0;
-            
+            Address sprawdzany = (Address)sprawdzanyy;
             //szukanie portu dla adresu
             for (int i = 0; i < parent.routeList.Count; i++ )
             {
@@ -107,18 +122,57 @@ namespace Nodix
                     break;
                 }
             }
-                //wysyłka pakietu na wyszukanym porcie
+            if(port==0)
+            {
+                //Wyslij z automatu no, bo nie ma takiego portu, żeby pakiet doszedł na ten adres
+                return;
+            }
+            //wysyłka pakietu na wyszukanym porcie
+            {
+                String str = "ZYJESZ?";/////odpowiedzią na taki paylaod będzie ZYJE :)
+                byte[] payload = ToPayload(str);
+                Packet.ATMPacket packiet = new Packet.ATMPacket(Packet.ATMPacket.AALType.SSM, payload, 0, 0);
+                packiet.port = port;
+                packiet.VCI = -1;
+                packiet.VPI = -1;
+                parent.queuedReceivedPackets.Enqueue(packiet);
+            }
+
+            //czekanie na odp 
+            {
+                bool znaleziono=false;
+                Stopwatch t = new Stopwatch();
+                int maxwaitmilis = 3000; //czekaj do 3 sekund na odpowiedź od sąsiada
+                t.Start();
+                while (t.ElapsedMilliseconds < maxwaitmilis)
                 {
-                    String str = "ZYJESZ?";/////odpowiedzią na taki paylaod będzie ZYJE :)
-                    byte[] payload = ToPayload(str);
-                    Packet.ATMPacket packiet = new Packet.ATMPacket(Packet.ATMPacket.AALType.SSM, payload, 0, 0);
-                    packiet.port = port;
-                    packiet.VCI = -1;
-                    packiet.VPI = -1;
-                    parent.queuedReceivedPackets.Enqueue(packiet);
+                    //przeszukanie listy pakietów
+                    for(int i=0;i<kolejkaodp.Count;i++)
+                    {
+                        if(kolejkaodp.ElementAt(i).port==port)
+                        {
+                            znaleziono = true;
+                            kolejkaodp.RemoveAt(i);//usuwam bez dalszego zaglądania, bo jak coś siedzi w tej kolejce to ma w payload ZYJE
+                            break;//gdy znaleziono to wychodzi z pętli for
+                        }
+
+                    }
+                    if(znaleziono)
+                    {
+                        break;//gdy znaleziono to wychodzi z pętli while
+                    }
+                }
+                //obsługa rezultatu, jeśli znaleziono to wyślij YES <adres>, jak nie to NO <adres>
+                if(znaleziono)
+                {
+                    wyslijSPacket(new SPacket(adresLRM,adresRC,"YES "+sprawdzany.ToString()));
+                }
+                else
+                {
+                    wyslijSPacket(new SPacket(adresLRM, adresRC, "NO " + sprawdzany.ToString()));
                 }
 
-            //czekanie na odp TODO
+            }
         }
         public void wyslijSPacket(Packet.SPacket cos)//wysyłanie przez chmurę kablową
         {
@@ -135,6 +189,15 @@ namespace Nodix
         public String FromPayload(byte[] payload)
         {
             return AAL.GetStringFromBytes(payload);
+        }
+        public bool ZwolnijZasob()//zwraca true jak się uda
+        {
+
+            return false;
+        }
+        public bool ZajmijZasob()//zwraca true jak się uda
+        {
+            return false;
         }
     }
 }
