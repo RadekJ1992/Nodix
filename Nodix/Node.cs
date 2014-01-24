@@ -56,7 +56,7 @@ namespace Nodix {
         private Thread controlSendThread;        // analogicznie - do wysyłania
 
         private Queue _whatToSendQueue;
-        private Queue whatToSendQueue;
+        public Queue whatToSendQueue;
 
         //dane chmury
         private IPAddress cloudAddress;        //Adres na którym chmura nasłuchuje
