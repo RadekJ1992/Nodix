@@ -25,7 +25,9 @@ namespace Nodix
         {
             parent = nod;
             adresLRM = nod.myAddress.ToString();
-            adresRC = null;
+            Address temp = Address.Parse(adresLRM);
+            temp.host = 0;
+            adresRC = temp.ToString();
             kolejkapyt = new ConcurrentQueue<Packet.ATMPacket>();
             kolejkaodp = new List<Packet.ATMPacket>();
             kolejkaS = new ConcurrentQueue<SPacket>();
@@ -35,16 +37,18 @@ namespace Nodix
             s = new Thread(new ThreadStart(SReader));
             s.IsBackground = true;
             s.Start();
+            //logowanie
+            wyslijSPacket(new SPacket(adresLRM, adresRC, "HELLO "+adresLRM));
 
         }
-        
+        #region wątki czytające SPackety i ATMPackety z kolejek
         public void ATMReader()//wątek obsługujący odczytywanie pakietów z zapytaniami, te z odpowiedziami będą jakoś(jeszcze nie wiem jak) obsługiwane w CzyZyje
         {
             while (true)
             {
                 if(kolejkapyt.Count == 0)
                 {
-                    Thread.Sleep(50);
+                    Thread.Sleep(100);
                     continue;
                 }
                 try
@@ -52,7 +56,7 @@ namespace Nodix
                     ATMPacket zapytanie, odpowiedz;
                     kolejkapyt.TryDequeue(out zapytanie);
                     //obsługa pakietu od innego LRMa, w tej metodzie interesują nas tylko wiadomosci z zapytaniem, odpowiedzi obsługiwane są metodą CzyZyje
-                    //więc jak wykryjemy odp to idzie do drugiej kolejki
+                    //więc jak wykryjemy odp to idzie do drugiej kolejki już na etapie przekazania pakietu przez Nodix
                     byte[] payload = ToPayload("ZYJE");
                     odpowiedz = new Packet.ATMPacket(Packet.ATMPacket.AALType.SSM, payload, 0, 0);
                     odpowiedz.port = zapytanie.port;
@@ -72,13 +76,99 @@ namespace Nodix
             {
                 if (kolejkaS.Count == 0)
                 {
-                    Thread.Sleep(50);
+                    Thread.Sleep(100);
                     continue;
                 }
                 try
                 {
-                    //przy przyjściu jakiejkolwiek wiadomości od RC wstawić jej adres do pola adresRC
-                    //tu zrobić rozpoznawanie wszystkich możliwych wiadomosci i ich obsługę
+                    SPacket pakiet;
+                    if(!kolejkaS.TryDequeue(out pakiet))
+                    {
+                        Thread.Sleep(100);
+                        continue;//jeśli nie udało się zdejmowanie przejdź do następnego obiegu po chwili pauzy
+                    }
+                    String komenda = pakiet.getParames().ElementAt(0);//zczytywanie komendy
+                    String nowakomenda = "";
+                    if(komenda.Equals("IS_ALIVE"))//to jest do do wysyłania pakietu próbnego do sąsiada o zadanym adresie np. IS_ALIVE 1.2.3
+                    {
+                        Address sprawdzany = Address.Parse(pakiet.getParames().ElementAt(1));
+                        CzyZyjeRun(sprawdzany);
+                    }
+                    else if (komenda.Equals("IS_LINK_AVAILABLE"))
+                    {
+                        Address sprawdzany = Address.Parse(pakiet.getParames().ElementAt(1));
+                        for(int i=0; i<parent.routeList.Count;i++)
+                        {
+                            if(sprawdzany.Equals(parent.routeList.ElementAt(i).destAddr))
+                            {
+                                if(parent.routeList.ElementAt(i).bandwidth>=2)
+                                {
+                                    nowakomenda = "YES_AVAILABLE " + sprawdzany.ToString();
+                                    break;
+                                }
+                                else
+                                {
+                                    nowakomenda = "NO_AVAILABLE " + sprawdzany.ToString();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else if(komenda.Equals("ADD"))
+                    {
+                        nowakomenda = "CHUJ WIE CO DO USTALENIA W AGENCIE NIE MA WIADOMOSCI ZWROTNYCH";/////////////////////////////////////////////////////////////////////////////
+                        if(pakiet.getParames().Count==7)
+                        {
+                            List<String> p = pakiet.getParames();
+                            int vp1, vc1, vp2, vc2;
+                            Address a1, a2;
+                            a1 = Address.Parse(p.ElementAt(1));
+                            vp1 = int.Parse(p.ElementAt(2));
+                            vc1 = int.Parse(p.ElementAt(3));
+                            a2 = Address.Parse(p.ElementAt(4));
+                            vp2 = int.Parse(p.ElementAt(5));
+                            vc2 = int.Parse(p.ElementAt(6));
+                            int p1 = AddressToPort(a1);
+                            int p2 = AddressToPort(a2);
+                            parent.addSingleEntry(p1, vp1, vc1, p2, vp2, vc2);
+                            ZajmijZasob(a1, a2);
+                        }
+                        else
+                        {
+                            nowakomenda = "ERROR ZŁA LICZBA PARAMETRÓW W ADD";
+                        }
+                        
+                    }
+                    else if(komenda.Equals("DELETE"))
+                    {
+                        nowakomenda = "CHUJ WIE CO DO USTALENIA W AGENCIE NIE MA WIADOMOSCI ZWROTNYCH";/////////////////////////////////////////////////////////////////////////////
+                        if (pakiet.getParames().Count == 7)
+                        {
+                            List<String> p = pakiet.getParames();
+                            int  vp1, vc1, vp2, vc2;
+                            Address a1, a2;
+                            a1 = Address.Parse(p.ElementAt(1));
+                            vp1 = int.Parse(p.ElementAt(2));
+                            vc1 = int.Parse(p.ElementAt(3));
+                            a2 = Address.Parse(p.ElementAt(4));
+                            vp2 = int.Parse(p.ElementAt(5));
+                            vc2 = int.Parse(p.ElementAt(6));
+                            int p1 = AddressToPort(a1); 
+                            parent.removeSingleEntry(p1, vp1, vc1);
+                            ZwolnijZasob(a1, a2);
+                        }
+                        else
+                        {
+                            nowakomenda = "ERROR ZŁA LICZBA PARAMETRÓW W DELETE";
+                        }
+                        
+                    }
+                    /*else if (komenda.Equals("IS_ALIVE"))
+                    {
+
+                    }*/
+                    pakiet.Swap(nowakomenda);
+                    wyslijSPacket(pakiet);
                 }
                 catch (Exception e)
                 {
@@ -86,7 +176,8 @@ namespace Nodix
                 }
             }
         }
-
+        #endregion
+        #region dodaj pakiet ATM
         public void OdczytajATM(Packet.ATMPacket pkt)//każdy pakiet, od razu rozpoznaje rodzaj - czy zapytanie czy odpowiedź, innych nie powinno być, najwyzej przepadną, dodawanie do dobrej kolejki
         {
             String tresc = this.FromPayload(pkt.payload);
@@ -100,7 +191,8 @@ namespace Nodix
             }
            
         }
-
+        #endregion
+        #region sprawdzanie połączenia między Nodixami
         public void CzyZyjeRun(Address sprawdzany)//dla każdego zapytania o sprawność łącza od RC odpalany nowy wątek tą metodą
         {
             new Thread(new ParameterizedThreadStart(_CzyZyje));
@@ -116,7 +208,7 @@ namespace Nodix
             //szukanie portu dla adresu
             for (int i = 0; i < parent.routeList.Count; i++ )
             {
-                if(parent.routeList.ElementAt(i).destAddr == sprawdzany)//jak adres się zgadza to mamy szukany port do wysyłki
+                if(parent.routeList.ElementAt(i).destAddr.Equals(sprawdzany))//jak adres się zgadza to mamy szukany port do wysyłki
                 {
                     port = parent.routeList.ElementAt(i).port;
                     break;
@@ -161,19 +253,22 @@ namespace Nodix
                     {
                         break;//gdy znaleziono to wychodzi z pętli while
                     }
+                    Thread.Sleep(100);
                 }
                 //obsługa rezultatu, jeśli znaleziono to wyślij YES <adres>, jak nie to NO <adres>
                 if(znaleziono)
                 {
-                    wyslijSPacket(new SPacket(adresLRM,adresRC,"YES "+sprawdzany.ToString()));
+                    wyslijSPacket(new SPacket(adresLRM,adresRC,"YES_ALIVE " + sprawdzany.ToString()));
                 }
                 else
                 {
-                    wyslijSPacket(new SPacket(adresLRM, adresRC, "NO " + sprawdzany.ToString()));
+                    wyslijSPacket(new SPacket(adresLRM, adresRC, "NO_ALIVE " + sprawdzany.ToString()));
                 }
 
             }
         }
+        #endregion
+        #region TransferSPacket
         public void wyslijSPacket(Packet.SPacket cos)//wysyłanie przez chmurę kablową
         {
             parent.whatToSendQueue.Enqueue(cos);
@@ -182,6 +277,8 @@ namespace Nodix
         {
             kolejkaS.Enqueue(cos);
         }
+        #endregion
+        #region konwersja payload<->String
         public byte[] ToPayload(String str)
         {
             return AAL.GetBytesFromString(str);
@@ -190,14 +287,76 @@ namespace Nodix
         {
             return AAL.GetStringFromBytes(payload);
         }
-        public bool ZwolnijZasob()//zwraca true jak się uda
+        #endregion
+        #region zasoby
+        public bool ZwolnijZasob(Address a1, Address a2)
         {
-
-            return false;
+            int result=0;
+            for (int i = 0; i < parent.routeList.Count; i++)
+            {
+                if (parent.routeList.ElementAt(i).Equals(a1) || parent.routeList.ElementAt(i).Equals(a2))
+                {
+                    parent.routeList.ElementAt(i).bandwidth += 2;
+                    result++;
+                }
+                
+            }
+            if (result == 2)
+                return true;
+            else
+                return false;
         }
-        public bool ZajmijZasob()//zwraca true jak się uda
+        public bool ZajmijZasob(Address a1, Address a2)
         {
-            return false;
+            int result = 0;
+            for (int i = 0; i < parent.routeList.Count; i++)
+            {
+                if (parent.routeList.ElementAt(i).Equals(a1) || parent.routeList.ElementAt(i).Equals(a2))
+                {
+                    if (parent.routeList.ElementAt(i).bandwidth<2)
+                    {
+                        break;
+                    }
+                    parent.routeList.ElementAt(i).bandwidth -= 2;
+                    result++;
+                }
+
+            }
+            if (result == 2)
+                return true;
+            else
+                return false;
+        }
+        #endregion
+        public int AddressToPort(String S)
+        {
+            Address spr = Address.Parse(S);
+            return AddressToPort(spr);
+        }
+        public Address PortToAddress(int port)
+        {
+            Address result = null;
+            for(int i=0; i<parent.routeList.Count;i++)
+            {
+                if(parent.routeList.ElementAt(i).port == port)
+                {
+                    result = parent.routeList.ElementAt(i).destAddr;
+                }
+            }
+            return result;
+        }
+        public int AddressToPort(Address sprawdzany)
+        {
+            int port = 0;
+            for (int i = 0; i < parent.routeList.Count; i++)
+            {
+                if (parent.routeList.ElementAt(i).destAddr.Equals(sprawdzany))//jak adres się zgadza to mamy szukany port do wysyłki
+                {
+                    port = parent.routeList.ElementAt(i).port;
+                    break;
+                }
+            }
+            return port;
         }
     }
 }
