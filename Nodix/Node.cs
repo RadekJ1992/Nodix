@@ -615,13 +615,13 @@ namespace Nodix {
         /// wątek wysyłający wiadomości do chmury
         /// </summary>
         public void controlSender() {
-            while (isConnectedToCloud) {
+            while (isConnectedToControlCloud) {
                 //jeśli coś jest w kolejce - zdejmij i wyślij
                 if (whatToSendQueue.Count != 0) {
                     SPacket _pck = (SPacket)whatToSendQueue.Dequeue();
                     BinaryFormatter bformatter = new BinaryFormatter();
-                    bformatter.Serialize(networkStream, _pck);
-                    networkStream.Flush();
+                    bformatter.Serialize(controlNetworkStream, _pck);
+                    controlNetworkStream.Flush();
                     String[] _argsToShow = _pck.getParames().ToArray();
                     String argsToShow = "";
                     foreach (String str in _argsToShow) {
