@@ -117,7 +117,7 @@ namespace Nodix
                             }
                         }
                     }
-                    else if(komenda.Equals("ADD"))
+                    else if(komenda.Equals("ADD_MAPPING"))
                     {
                        
                         if(pakiet.getParames().Count==7)
@@ -143,7 +143,7 @@ namespace Nodix
                         }
                         
                     }
-                    else if(komenda.Equals("DELETE"))
+                    else if(komenda.Equals("DEL_MAPPING"))
                     {
                        
                         if (pakiet.getParames().Count == 7)
