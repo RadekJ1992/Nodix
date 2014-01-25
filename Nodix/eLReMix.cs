@@ -116,7 +116,7 @@ namespace Nodix
                     }
                     else if(komenda.Equals("ADD"))
                     {
-                        nowakomenda = "CHUJ WIE CO DO USTALENIA W AGENCIE NIE MA WIADOMOSCI ZWROTNYCH";/////////////////////////////////////////////////////////////////////////////
+                       
                         if(pakiet.getParames().Count==7)
                         {
                             List<String> p = pakiet.getParames();
@@ -132,6 +132,7 @@ namespace Nodix
                             int p2 = AddressToPort(a2);
                             parent.addSingleEntry(p1, vp1, vc1, p2, vp2, vc2);
                             ZajmijZasob(a1, a2);
+                            nowakomenda = "MSG zadanie ADD wykonane";
                         }
                         else
                         {
@@ -141,7 +142,7 @@ namespace Nodix
                     }
                     else if(komenda.Equals("DELETE"))
                     {
-                        nowakomenda = "CHUJ WIE CO DO USTALENIA W AGENCIE NIE MA WIADOMOSCI ZWROTNYCH";/////////////////////////////////////////////////////////////////////////////
+                       
                         if (pakiet.getParames().Count == 7)
                         {
                             List<String> p = pakiet.getParames();
@@ -156,6 +157,7 @@ namespace Nodix
                             int p1 = AddressToPort(a1); 
                             parent.removeSingleEntry(p1, vp1, vc1);
                             ZwolnijZasob(a1, a2);
+                            nowakomenda = "MSG zadanie DELETE wykonane";
                         }
                         else
                         {
