@@ -462,7 +462,6 @@ namespace Nodix {
         public void readConfig(String nAddr) {
             try {
                 myAddress = Address.Parse(nAddr);
-                Nodix.ActiveForm.Text += " " + nAddr;
                 isNodeAddressSet = true;
                 NodeNetworkNumberField.Text = String.Empty + myAddress.network;
                 NodeSubnetworkNumberField.Text = String.Empty + myAddress.subnet;
