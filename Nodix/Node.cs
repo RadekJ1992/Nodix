@@ -58,6 +58,7 @@ namespace Nodix {
         private Queue _whatToSendQueue;
         public Queue whatToSendQueue;
 
+        private eLReMix LRM;
         //dane chmury
         private IPAddress cloudAddress;        //Adres na którym chmura nasłuchuje
         private Int32 cloudPort;           //port chmury
@@ -90,9 +91,7 @@ namespace Nodix {
 
         //agent zarządzania
         private Agentix agent;
-        //LRM
-        private eLReMix lrm;//jeszcze kwestia jak go podłączyć w konstruktorze czy tworzyć go potem przy kliknięciu połącz
-
+        
         public List<Route> routeList;
         // tablica kierowania
         // UWAGA!
@@ -200,12 +199,7 @@ namespace Nodix {
             try {
                 receivedPacket = (Packet.ATMPacket)bf.Deserialize(networkStream);
                 if (receivedPacket.VPI == -1 && receivedPacket.VCI == -1) {
-                    //WYŚLIJ DO LRM
-
-
-
-
-
+                    LRM.OdczytajATM(receivedPacket);
                 }
                 else queuedReceivedPackets.Enqueue(receivedPacket);
 
@@ -567,7 +561,7 @@ namespace Nodix {
                     }
 
                     controlCloudSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    controlCloudEndPoint = new IPEndPoint(cloudAddress, cloudPort);
+                    controlCloudEndPoint = new IPEndPoint(controlCloudAddress, controlCloudPort);
                     try {
                         controlCloudSocket.Connect(controlCloudEndPoint);
                         isConnectedToControlCloud = true;
@@ -584,6 +578,7 @@ namespace Nodix {
                         controlSendThread.IsBackground = true;
                         controlSendThread.Start();
                         conToCloudButton.Text = "Rozłącz";
+                        LRM = new eLReMix(this);
                         SetText("Połączono!\n");
                     } catch (SocketException) {
                         isConnectedToControlCloud = false;
@@ -610,17 +605,7 @@ namespace Nodix {
                     SPacket receivedPacket = (Packet.SPacket)bf.Deserialize(controlNetworkStream);
                     //_msg = reader.ReadLine();
                     SetText("Odczytano:\n" + receivedPacket.ToString() + "\n");
-                    /*
-                     * 
-                     * 
-                     * 
-                     * 
-                     *  tutaj przekazać pakiet do LRMA
-                     * 
-                     * 
-                     * 
-                     * 
-                     */
+                    LRM.OdczytajS(receivedPacket);
                 } catch {
                     SetText("WUT");
                 }
