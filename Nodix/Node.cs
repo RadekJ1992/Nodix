@@ -434,9 +434,11 @@ namespace Nodix {
                 isNodeAddressSet = true;
                 myAddress = new Address(nodeAddressNetwork, nodeAddressSubnet, nodeAddressHost);
                 SetText("Numer węzła ustawiony jako " + myAddress.ToString() + "\n");
+                Nodix.ActiveForm.Text = "Nodix " + myAddress.ToString();
             } catch {
                 isNodeAddressSet = false;
                 SetText("Błędne dane wejściowe\n");
+                Nodix.ActiveForm.Text = "Nodix";
             }
         }
 
