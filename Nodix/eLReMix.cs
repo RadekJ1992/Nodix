@@ -19,7 +19,7 @@ namespace Nodix
         private ConcurrentQueue<Packet.ATMPacket> kolejkapyt;//kolejka zapytań pakietów ATM z vpi vci -1
         private List<Packet.ATMPacket> kolejkaodp;//kolejka odp od LRMów sąsiadów, używana w CzyZyje
         private ConcurrentQueue<Packet.SPacket> kolejkaS;//kolejka SPacketów do wątku s
-        String adresLRM, adresRC;//lokalne kopie, coby nie szukać za długo
+        String adresLRM, adresRC, adresCC;//lokalne kopie, coby nie szukać za długo
 
         public eLReMix(Nodix nod)
         {
@@ -28,6 +28,8 @@ namespace Nodix
             Address temp = Address.Parse(adresLRM);
             temp.host = 0;
             adresRC = temp.ToString();
+            temp.host = 1;
+            adresCC = temp.ToString();
             kolejkapyt = new ConcurrentQueue<Packet.ATMPacket>();
             kolejkaodp = new List<Packet.ATMPacket>();
             kolejkaS = new ConcurrentQueue<SPacket>();
@@ -39,6 +41,7 @@ namespace Nodix
             s.Start();
             //logowanie
             wyslijSPacket(new SPacket(adresLRM, adresRC, "HELLO "+adresLRM));//logowanie do RC
+            wyslijSPacket(new SPacket(adresLRM, adresCC, "HELLO " + adresLRM));//logowanie do RC
 
         }
         #region wątki czytające SPackety i ATMPackety z kolejek
@@ -165,10 +168,14 @@ namespace Nodix
                         }
                         
                     }
-                    /*else if (komenda.Equals("IS_ALIVE"))
+                    else if (komenda.Equals("REQ_TOPOLOGY"))
                     {
-
-                    }*/
+                        nowakomenda = "TOPOLOGY";
+                        for(int i=0;i<parent.routeList.Count;i++)
+                        {
+                            nowakomenda += " " + parent.routeList.ElementAt(i).destAddr.ToString();
+                        }
+                    }
                     pakiet.Swap(nowakomenda);//metoda zamienia src i dest i ustawia nowe parames
                     wyslijSPacket(pakiet);
                 }
