@@ -96,6 +96,7 @@ namespace Nodix
                     {
                         Address sprawdzany = Address.Parse(pakiet.getParames().ElementAt(1));
                         CzyZyjeRun(sprawdzany);//odpowiedzią zajmuje się metoda CzyZyje
+                        continue;
                     }
                     /*else if (komenda.Equals("IS_LINK_AVAILABLE"))
                     {
@@ -204,9 +205,9 @@ namespace Nodix
         #region sprawdzanie połączenia między Nodixami
         public void CzyZyjeRun(Address sprawdzany)//dla każdego zapytania o sprawność łącza od RC odpalany nowy wątek tą metodą
         {
-            new Thread(new ParameterizedThreadStart(_CzyZyje));
-            s.IsBackground = true;
-            s.Start(sprawdzany);
+            Thread ss =new Thread(new ParameterizedThreadStart(_CzyZyje));
+            ss.IsBackground = true;
+            ss.Start(sprawdzany);
         }
 
         
@@ -285,11 +286,11 @@ namespace Nodix
                 //obsługa rezultatu, jeśli znaleziono to wyślij YES <adres>, jak nie to NO <adres>
                 if(znaleziono && wolne)
                 {
-                    wyslijSPacket(new SPacket(adresLRM,adresRC,"YES " + sprawdzany.ToString()));
+                    wyslijSPacket(new SPacket(adresLRM,adresRC,("YES " + sprawdzany.ToString())));
                 }
                 else
                 {
-                    wyslijSPacket(new SPacket(adresLRM, adresRC, "NO " + sprawdzany.ToString()));
+                    wyslijSPacket(new SPacket(adresLRM, adresRC, ("NO " + sprawdzany.ToString())));
                 }
 
             }
