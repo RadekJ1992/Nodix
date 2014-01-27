@@ -25,11 +25,13 @@ namespace Nodix {
             public Address destAddr;
             public int bandwidth;
             public int port;
+            public List<int> VPIList;
 
-            public Route(Address addr, int band, int port) {
+            public Route(Address addr, int band, int port, List<int> VPIList) {
                 destAddr = addr;
                 bandwidth = band;
                 this.port = port;
+                this.VPIList = VPIList;
             }
         }
 
@@ -488,7 +490,14 @@ namespace Nodix {
                             if (int.TryParse(command[1], out port)) {
                                 if (Address.TryParse(command[2], out adr)) {
                                     if (int.TryParse(command[3], out band)) {
-                                        routeList.Add(new Route(adr,band,port));
+                                        List<int> _VPIList = new List<int>();
+                                        for (int i = 4; i < command.Length; i++) {
+                                            int vpi;
+                                            if (int.TryParse(command[3], out vpi)) {
+                                                _VPIList.Add(vpi);
+                                            }
+                                        }
+                                        routeList.Add(new Route(adr, band, port, _VPIList));
                                     } else SetText("Zły format danych\n");
                                 }else SetText("Zły format danych\n");
                             }else SetText("Zły format danych\n");
@@ -521,8 +530,13 @@ namespace Nodix {
                     if (VCArray.TryGetValue(key, out value)) lines.Add("ADD " + key.port + " " + key.VPI + " " + key.VCI +
                                                                         " " + value.port + " " + value.VPI + " " + value.VCI);
                 }
+                
                 foreach (Route rt in routeList) {
-                    lines.Add("ADD_ROUTE " + rt.port + " " + rt.destAddr.ToString() + " " + rt.bandwidth);
+                    String _vpiString = String.Empty;
+                    foreach (int _vpi in rt.VPIList) {
+                        _vpiString += _vpi + " ";
+                    }
+                    lines.Add("ADD_ROUTE " + rt.port + " " + rt.destAddr.ToString() + " " + rt.bandwidth + " " + _vpiString);
                 }
                 System.IO.File.WriteAllLines("config" + myAddress.ToString() + ".txt", lines);
                 SetText("Zapisuję ustawienia do pliku config" + myAddress.ToString() + ".txt\n");
