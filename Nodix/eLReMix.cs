@@ -177,6 +177,32 @@ namespace Nodix
                             nowakomenda += " " + parent.routeList.ElementAt(i).destAddr.ToString();
                         }
                     }
+                    else if(komenda.Equals("DEAD"))
+                    {
+                        bool czySonsiad = false;
+                        Address sprawdzany = Address.Parse(pakiet.getParames().ElementAt(1));
+                        for (int i = 0; i < parent.routeList.Count; i++ )
+                        {
+                            if(sprawdzany.Equals(parent.routeList.ElementAt(i).destAddr))
+                            {
+                                czySonsiad = true;
+                                break;
+                            }
+                        }
+                        if(czySonsiad)
+                        {
+                            SPacket wysylanyCC, wysylanyRC;
+                            wysylanyCC = new SPacket(adresLRM, adresCC, "DEAD " + sprawdzany.ToString());
+                            wysylanyRC = new SPacket(adresLRM, adresRC, "DEAD " + sprawdzany.ToString());
+                            wyslijSPacket(wysylanyCC);
+                            wyslijSPacket(wysylanyRC);
+                        }
+                        else
+                        {
+                            //do nothing?
+                        }
+                        return;//nie swapujemy pakietu, bo to nie odpowiedź
+                    }
                     pakiet.Swap(nowakomenda);//metoda zamienia src i dest i ustawia nowe parames
                     wyslijSPacket(pakiet);
                 }
