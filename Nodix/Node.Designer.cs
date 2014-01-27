@@ -465,6 +465,7 @@
             this.Name = "Nodix";
             this.Text = "Nodix";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Nodix_FormClosed);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.Nodix_Paint);
             this.ResumeLayout(false);
             this.PerformLayout();
 

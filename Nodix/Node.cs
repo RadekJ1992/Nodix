@@ -43,6 +43,8 @@ namespace Nodix {
         //public int nodeNumber { get; set; }
         private bool isNodeAddressSet;
 
+        private bool isNameSet;
+
         public Address myAddress {get; set;}
 
         //kolejka pakietów odebranych z chmury - concurrentQueue jest thread-safe, zwykła queue nie
@@ -107,6 +109,7 @@ namespace Nodix {
         private Dictionary<PortVPIVCI, PortVPIVCI> VCArray = new Dictionary<PortVPIVCI,PortVPIVCI>(new PortVPIVCIComparer());
 
         public Nodix() {
+            isNameSet = false;
             InitializeComponent();
             isNodeAddressSet = false;
             isConnectedToControlCloud = false;
@@ -644,6 +647,12 @@ namespace Nodix {
                     SetText("Wysłano: " + _pck.getSrc() + ":" + _pck.getDest() + ":" + argsToShow + "\n");
                     Thread.Sleep(50);
                 }
+            }
+        }
+    private void Nodix_Paint(object sender, EventArgs e) {
+        if (myAddress != null && isNameSet != true) {
+            Nodix.ActiveForm.Text = "Nodix " + myAddress.ToString();
+            isNameSet = true;
             }
         }
     }
