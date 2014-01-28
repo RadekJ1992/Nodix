@@ -201,7 +201,24 @@ namespace Nodix
                         {
                             //do nothing?
                         }
-                        return;//nie swapujemy pakietu, bo to nie odpowiedź
+                        continue;//nie swapujemy pakietu, bo to nie odpowiedź
+                    }
+                    else if(komenda.Equals("REQ_VPATHS"))
+                    {
+                        List<String> lista = new List<string>();
+                        lista.Add("RES_VPATHS");
+                        for(int i=0; i<parent.routeList.Count;i++)
+                        {
+                            String result = parent.routeList.ElementAt(i).destAddr.ToString();
+                            for (int j = 0; j < parent.routeList.ElementAt(i).VPIList.Count; j++)
+                            {
+                                result += "#" + parent.routeList.ElementAt(i).VPIList.ElementAt(j).ToString();
+                            }
+                            lista.Add(result);
+                        }
+                        SPacket pkt = new SPacket(adresLRM, adresCC, lista);
+                        wyslijSPacket(pkt);
+                        continue;
                     }
                     pakiet.Swap(nowakomenda);//metoda zamienia src i dest i ustawia nowe parames
                     wyslijSPacket(pakiet);
