@@ -678,10 +678,10 @@ namespace Nodix {
                     SetText("Wprowadź numery sieci i podsieci\n");
                 }
             } else {
-                isConnectedToCloud = false;
+                isConnectedToControlCloud = false;
                 conToCloudButton.Text = "Połącz";
                 SetText("Rozłączono!\n");
-                if (cloudSocket != null) cloudSocket.Close();
+                if (controlCloudSocket != null) controlCloudSocket.Close();
             }
         }
         /// <summary>
