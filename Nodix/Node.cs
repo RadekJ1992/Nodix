@@ -213,8 +213,8 @@ namespace Nodix {
                     sendThread = new Thread(this.sender);
                     sendThread.IsBackground = true;
                     sendThread.Start();
-                    receiver();
                 }
+                    receiver();
             } catch (Exception e) {
                 if (isDisconnect) { SetText("Rozłączam się z chmurą!\n"); isDisconnect = false; networkStream = null; }
                 else { SetText("Coś poszło nie tak : " + e.Message + "\n"); }
