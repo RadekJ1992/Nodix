@@ -627,7 +627,7 @@ namespace Nodix {
         }
 
         private void Nodix_FormClosed(object sender, FormClosedEventArgs e) {
-            if (myAddress != null) saveConfig();
+           // if (myAddress != null) saveConfig();
         }
 
         /// <summary>
