@@ -460,7 +460,7 @@ namespace Nodix {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == DialogResult.OK) {
                 path = openFileDialog.FileName;
-                readConfig(path);
+                readConfig(path, true);
             }
         }
 
@@ -496,14 +496,86 @@ namespace Nodix {
                                         List<int> _VPIList = new List<int>();
                                         for (int i = 4; i < command.Length; i++) {
                                             int vpi;
-                                            if (int.TryParse(command[3], out vpi)) {
+                                            if (int.TryParse(command[i], out vpi)) {
                                                 _VPIList.Add(vpi);
                                             }
                                         }
                                         routeList.Add(new Route(adr, band, port, _VPIList));
+                                        SetText("Dodaję ścieżkę do " + adr.ToString() + " o przepustowości " + band + " Mbit/s na porcie " + port + "\n");
+                                        String _VPIListString = String.Empty;
+                                        foreach (int i in _VPIList) {
+                                            _VPIListString += i + " ";
+                                        }
+                                        SetText("VPaths na tym łączu to " + _VPIListString + "\n");
                                     } else SetText("Zły format danych\n");
                                 }else SetText("Zły format danych\n");
                             }else SetText("Zły format danych\n");
+                        }
+                    }
+                }
+            } catch (Exception exc) {
+                SetText("Błąd podczas konfigurowania pliku konfiguracyjnego\n");
+                SetText(exc.Message + "\n");
+            }
+        }
+
+        public void readConfig(String path, bool justToOverload) {
+            try {
+                //myAddress = Address.Parse(nAddr);
+                //isNodeAddressSet = true;
+                //NodeNetworkNumberField.Text = String.Empty + myAddress.network;
+                //NodeSubnetworkNumberField.Text = String.Empty + myAddress.subnet;
+                //NodeHostNumberField.Text = String.Empty + myAddress.host;
+                SetText("Wczytuje plik konfiguracyjny z " + path + "\n");
+                //String path = "config" + nAddr + ".txt";
+                using (StreamReader sr = new StreamReader(path)) {
+                    string[] lines = System.IO.File.ReadAllLines(path);
+                    foreach (String line in lines) {
+                        String[] command = line.Split(' ');
+                        if (command[0] == "ADD") {
+                            try {
+                                addSingleEntry(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]),
+                                    int.Parse(command[4]), int.Parse(command[5]), int.Parse(command[6]));
+                            } catch (IndexOutOfRangeException) {
+                                SetText("Komenda została niepoprawnie sformułowana (za mało parametrów)\n");
+                            }
+                        } else if (command[0] == "CLEAR") {
+                            clearTable();
+                        } else if (command[0] == "ADD_ROUTE") {
+                            Address adr;
+                            int port;
+                            int band;
+                            if (int.TryParse(command[1], out port)) {
+                                if (Address.TryParse(command[2], out adr)) {
+                                    if (int.TryParse(command[3], out band)) {
+                                        List<int> _VPIList = new List<int>();
+                                        for (int i = 4; i < command.Length; i++) {
+                                            int vpi;
+                                            if (int.TryParse(command[i], out vpi)) {
+                                                _VPIList.Add(vpi);
+                                            }
+                                        }
+                                        routeList.Add(new Route(adr, band, port, _VPIList));
+                                        SetText("Dodaję ścieżkę do " + adr.ToString() + " o przepustowości " + band + " Mbit/s na porcie " + port + "\n");
+                                        String _VPIListString = String.Empty;
+                                        foreach (int i in _VPIList) {
+                                            _VPIListString += i + " ";
+                                        }
+                                        SetText("VPaths na tym łączu to " + _VPIListString + "\n");
+                                    } else SetText("Zły format danych\n");
+                                } else SetText("Zły format danych\n");
+                            } else SetText("Zły format danych\n");
+                        } else if (command[0] == "SET_ADDR") {
+                            try{
+                                myAddress = new Address(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]));
+                                isNodeAddressSet = true;
+                                NodeNetworkNumberField.Text = String.Empty + myAddress.network;
+                                NodeSubnetworkNumberField.Text = String.Empty + myAddress.subnet;
+                                NodeHostNumberField.Text = String.Empty + myAddress.host;
+                                SetText("Ustalam adres węzła jako " + myAddress.ToString() + "\n");
+                            } catch {
+                                SetText("komenda ustalenia adresu została niepoprawnie sformułowana");
+                            }
                         }
                     }
                 }
