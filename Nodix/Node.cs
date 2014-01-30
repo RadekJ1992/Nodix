@@ -722,11 +722,20 @@ namespace Nodix {
             }
         }
     private void Nodix_Paint(object sender, EventArgs e) {
-        if (myAddress != null && isNameSet != true) {
+        if (myAddress != null) {
             Nodix.ActiveForm.Text = "Nodix " + myAddress.ToString();
             isNameSet = true;
             }
         }
+
+    private void Nodix_MouseEnter(object sender, EventArgs e)
+    {
+        if (myAddress != null && isNameSet != true)
+        {
+            Nodix.ActiveForm.Text = "Nodix " + myAddress.ToString();
+            isNameSet = true;
+        }
+    }
     }
 
     class Agentix {
