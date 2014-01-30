@@ -194,7 +194,7 @@ namespace Nodix {
                 networkStream = new NetworkStream(cloudSocket);
                 
                 //tworzy string 'Node ' i tu jego numer
-                String welcomeString = "Node " + myAddress.ToString();
+                String welcomeString = "Node " + ((myAddress.subnet*100)+myAddress.host) + " " + myAddress.ToString();
                 //tworzy tablicę bajtów z tego stringa
                 byte[] welcomeStringBytes = AAL.GetBytesFromString(welcomeString);
                 //wysyła tą tablicę bajtów streamem
