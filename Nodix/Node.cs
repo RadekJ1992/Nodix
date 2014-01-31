@@ -144,6 +144,9 @@ namespace Nodix {
                         receiveThread = new Thread(this.receiver);
                         receiveThread.IsBackground = true;
                         receiveThread.Start();
+                        sendThread = new Thread(this.sender);
+                        sendThread.IsBackground = true;
+                        sendThread.Start();
                     } catch {
                         isConnectedToCloud = false;
                         log.AppendText("Błąd podczas łączenia się z chmurą\n");
@@ -209,11 +212,11 @@ namespace Nodix {
                 else queuedReceivedPackets.Enqueue(receivedPacket);
 
                 //to może nie działać. Sprawdzi się jeszcze
-                if (!sendThread.IsAlive) {
+                /*if (!sendThread.IsAlive) {
                     sendThread = new Thread(this.sender);
                     sendThread.IsBackground = true;
                     sendThread.Start();
-                }
+                }*/
                     receiver();
             } catch (Exception e) {
                 if (isDisconnect) { SetText("Rozłączam się z chmurą!\n"); isDisconnect = false; networkStream = null; }
@@ -237,59 +240,78 @@ namespace Nodix {
         }
 
         private void sender() {
-            //if (!queuedReceivedPackets.IsEmpty) {
-            if (queuedReceivedPackets.TryDequeue(out processedPacket)) {
-                //queuedReceivedPackets.TryDequeue(out processedPacket);
-                if (processedPacket != null) {
-                    PortVPIVCI VCConKey = new PortVPIVCI();
-                    PortVPIVCI VPConKey = new PortVPIVCI();
-                    PortVPIVCI value = new PortVPIVCI();
-                    VCConKey.port = processedPacket.port;
-                    VCConKey.VPI = processedPacket.VPI;
-                    VCConKey.VCI = processedPacket.VCI;
-                    VPConKey.port = processedPacket.port;
-                    VPConKey.VPI = processedPacket.VPI;
-                    VPConKey.VCI = 0;
-                    NetworkStream networkStream = new NetworkStream(cloudSocket);
-                    if (processedPacket.VPI == -1 && processedPacket.VCI == -1) {
-                        SetText("Wysyłam pakiet sygnalizacyjny na porcie " + processedPacket.port + "\n");
-                        BinaryFormatter bformatter = new BinaryFormatter();
-                        bformatter.Serialize(networkStream, processedPacket);
-                        networkStream.Close();
-                    }
-                    if (VCArray.ContainsKey(VCConKey)) {
-                        if (VCArray.TryGetValue(VCConKey, out value)) {
-                            SetText("Przekierowywanie [" + processedPacket.port + ";" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + value.port + ";" + value.VPI + ";" + value.VCI + "]\n");
-                            processedPacket.VPI = value.VPI;
-                            processedPacket.VCI = value.VCI;
-                            processedPacket.port = value.port;
+            while(isConnectedToCloud) {
+            if (queuedReceivedPackets.Count != 0)
+            {
+                if (queuedReceivedPackets.TryDequeue(out processedPacket))
+                {
+                    if (processedPacket != null)
+                    {
+                        PortVPIVCI VCConKey = new PortVPIVCI();
+                        PortVPIVCI VPConKey = new PortVPIVCI();
+                        PortVPIVCI value = new PortVPIVCI();
+                        VCConKey.port = processedPacket.port;
+                        VCConKey.VPI = processedPacket.VPI;
+                        VCConKey.VCI = processedPacket.VCI;
+                        VPConKey.port = processedPacket.port;
+                        VPConKey.VPI = processedPacket.VPI;
+                        VPConKey.VCI = 0;
+                        NetworkStream networkStream = new NetworkStream(cloudSocket);
+                        if (processedPacket.VPI == -1 && processedPacket.VCI == -1)
+                        {
+                            SetText("Wysyłam pakiet sygnalizacyjny na porcie " + processedPacket.port + "\n");
                             BinaryFormatter bformatter = new BinaryFormatter();
                             bformatter.Serialize(networkStream, processedPacket);
                             networkStream.Close();
-                        } else {
-                            SetText("Coś poszło nie tak przy przepisywaniu wartości VPI i VCI z VCArray\n");
                         }
-                    } else if (VCArray.ContainsKey(VPConKey)) {
-                        if (VCArray.TryGetValue(VPConKey, out value)) {
+                        else
+                        {
+                            if (VCArray.ContainsKey(VCConKey))
+                            {
+                                if (VCArray.TryGetValue(VCConKey, out value))
+                                {
+                                    SetText("Przekierowywanie [" + processedPacket.port + ";" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + value.port + ";" + value.VPI + ";" + value.VCI + "]\n");
+                                    processedPacket.VPI = value.VPI;
+                                    processedPacket.VCI = value.VCI;
+                                    processedPacket.port = value.port;
+                                    BinaryFormatter bformatter = new BinaryFormatter();
+                                    bformatter.Serialize(networkStream, processedPacket);
+                                    networkStream.Close();
+                                }
+                                else
+                                {
+                                    SetText("Coś poszło nie tak przy przepisywaniu wartości VPI i VCI z VCArray\n");
+                                }
+                            }
+                            else if (VCArray.ContainsKey(VPConKey))
+                            {
+                                if (VCArray.TryGetValue(VPConKey, out value))
+                                {
 
-                            SetText("Przekierowywanie [" + processedPacket.port + ";" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + value.port + ";" + value.VPI + ";" + processedPacket.VCI + "]\n");
-                            processedPacket.VPI = value.VPI;
-                            processedPacket.port = value.port;
-                            // VCI bez zmian
-                            BinaryFormatter bformatter = new BinaryFormatter();
-                            bformatter.Serialize(networkStream, processedPacket);
-                            networkStream.Close();
-                        } else {
-                            SetText("Coś poszło nie tak przy przepisywaniu wartości VPI i VCI z VCArray\n");
+                                    SetText("Przekierowywanie [" + processedPacket.port + ";" + processedPacket.VPI + ";" + processedPacket.VCI + "]->[" + value.port + ";" + value.VPI + ";" + processedPacket.VCI + "]\n");
+                                    processedPacket.VPI = value.VPI;
+                                    processedPacket.port = value.port;
+                                    // VCI bez zmian
+                                    BinaryFormatter bformatter = new BinaryFormatter();
+                                    bformatter.Serialize(networkStream, processedPacket);
+                                    networkStream.Close();
+                                }
+                                else
+                                {
+                                    SetText("Coś poszło nie tak przy przepisywaniu wartości VPI i VCI z VCArray\n");
+                                }
+                            }
+                            else
+                            {
+                                SetText("Pakiet stracony - brak odpowiedniego wpisu w tablicy\n");
+                            }
                         }
-                    } else {
-                        SetText("Pakiet stracony - brak odpowiedniego wpisu w tablicy\n");
+
                     }
-
-
                 }
             }
-            sender();
+            Thread.Sleep(50);
+            }
         }
 
         //Dodaje pozycję do VCArray, pobiera dwa obiekty PortVPIVCI
