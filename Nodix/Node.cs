@@ -90,7 +90,7 @@ namespace Nodix {
         public bool isConnectedToManager { get; set; } // czy połączony z zarządcą?
 
         public bool isLoggedToManager { get; set; } // czy zalogowany w zarządcy?
-
+        private int exceptionCount;
         public bool isDisconnect;
 
         //agent zarządzania
@@ -109,6 +109,7 @@ namespace Nodix {
         private Dictionary<PortVPIVCI, PortVPIVCI> VCArray = new Dictionary<PortVPIVCI,PortVPIVCI>(new PortVPIVCIComparer());
 
         public Nodix() {
+            exceptionCount = 0;
             isNameSet = false;
             InitializeComponent();
             isNodeAddressSet = false;
@@ -669,6 +670,7 @@ namespace Nodix {
                         conToCloudButton.Text = "Rozłącz";
                         LRM = new eLReMix(this);
                         SetText("Połączono!\n");
+                        exceptionCount = 0;
                     } catch (SocketException) {
                         isConnectedToControlCloud = false;
                         SetText("Błąd podczas łączenia się z chmurą\n");
@@ -697,6 +699,14 @@ namespace Nodix {
                     LRM.OdczytajS(receivedPacket);
                 } catch {
                     SetText("WUT");
+                    if (++exceptionCount == 5) {
+                        this.Invoke((MethodInvoker)delegate() {
+                            isConnectedToControlCloud = false;
+                            conToCloudButton.Text = "Połącz";
+                            SetText("Rozłączono!");
+                            if (controlCloudSocket != null) controlCloudSocket.Close();
+                        });
+                    }
                 }
             }
         }
