@@ -94,8 +94,12 @@ namespace Nodix
                     String nowakomenda = "";
                     if (komenda.Equals("IS_LINK_AVAILABLE"))//to jest do do wysyłania pakietu próbnego do sąsiada o zadanym adresie np. IS_ALIVE 1.2.3 dawne IS_ALIVE
                     {
+                        int i2 = -1;
+                        if (pakiet.getParames().Count > 1)
+                            i2 = int.Parse(pakiet.getParames().ElementAt(2));
                         Address sprawdzany = Address.Parse(pakiet.getParames().ElementAt(1));
-                        CzyZyjeRun(sprawdzany);//odpowiedzią zajmuje się metoda CzyZyje
+                        Tuple<Address, int> argus = new Tuple<Address, int>(sprawdzany, i2);
+                        CzyZyjeRun(argus);//odpowiedzią zajmuje się metoda CzyZyje
                         continue;
                     }
                     /*else if (komenda.Equals("IS_LINK_AVAILABLE"))
@@ -246,19 +250,21 @@ namespace Nodix
         }
         #endregion
         #region sprawdzanie połączenia między Nodixami
-        public void CzyZyjeRun(Address sprawdzany)//dla każdego zapytania o sprawność łącza od RC odpalany nowy wątek tą metodą
+        public void CzyZyjeRun(Tuple<Address, int> argus)//dla każdego zapytania o sprawność łącza od RC odpalany nowy wątek tą metodą
         {
             Thread ss =new Thread(new ParameterizedThreadStart(_CzyZyje));
             ss.IsBackground = true;
-            ss.Start(sprawdzany);
+            ss.Start(argus);
         }
 
-        
-        private void _CzyZyje(Object sprawdzanyy)//pod dany adres (jaqk istnieje) wysyłamy ATMPacket z wiadomością ZYJESZ
+
+        private void _CzyZyje(Tuple<Address, int> argus)//pod dany adres (jaqk istnieje) wysyłamy ATMPacket z wiadomością ZYJESZ
         {
             bool wolne = false;
             int port=0;
-            Address sprawdzany = (Address)sprawdzanyy;
+            Address sprawdzany = argus.Item1;
+            int i2 = argus.Item2;
+
             //szukanie portu dla adresu
             for (int i = 0; i < parent.routeList.Count; i++ )
             {
@@ -329,11 +335,11 @@ namespace Nodix
                 //obsługa rezultatu, jeśli znaleziono to wyślij YES <adres>, jak nie to NO <adres>
                 if(znaleziono && wolne)
                 {
-                    wyslijSPacket(new SPacket(adresLRM,adresRC,("YES " + sprawdzany.ToString())));
+                    wyslijSPacket(new SPacket(adresLRM, adresRC, ("YES " + sprawdzany.ToString() + " " + i2)));
                 }
                 else
                 {
-                    wyslijSPacket(new SPacket(adresLRM, adresRC, ("NO " + sprawdzany.ToString())));
+                    wyslijSPacket(new SPacket(adresLRM, adresRC, ("NO " + sprawdzany.ToString() + " " + i2)));
                 }
 
             }
