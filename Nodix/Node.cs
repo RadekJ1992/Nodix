@@ -61,7 +61,7 @@ namespace Nodix {
 
         private Queue _whatToSendQueue;
         public Queue whatToSendQueue;
-
+        public bool connect = false;
         private eLReMix LRM;
         //dane chmury
         private IPAddress cloudAddress;        //Adres na którym chmura nasłuchuje
@@ -120,20 +120,28 @@ namespace Nodix {
             routeList = new List<Route>();
             _whatToSendQueue = new Queue();
             whatToSendQueue = Queue.Synchronized(_whatToSendQueue);
+            (new Thread(new ThreadStart(() => {
+                Thread.Sleep(1500);
+                if (connect) {
+                    connectToCloud(this, new EventArgs());
+                    conToCloudButton_Click(this, new EventArgs());
+                    connect = false;
+                }
+            }))).Start();
         }
 
         private void connectToCloud(object sender, EventArgs e) {
             if (isNodeAddressSet) {
                 if (!isConnectedToCloud) {
                     if (IPAddress.TryParse(cloudIPField.Text, out cloudAddress)) {
-                        log.AppendText("IP ustawiono jako " + cloudAddress.ToString() + " \n");
+                        SetText("IP ustawiono jako " + cloudAddress.ToString() + " \n");
                     } else {
-                        log.AppendText("Błąd podczas ustawiania IP chmury (zły format?)" + " \n");
+                        SetText("Błąd podczas ustawiania IP chmury (zły format?)" + " \n");
                     }
                     if (Int32.TryParse(cloudPortField.Text, out cloudPort)) {
-                        log.AppendText("Port chmury ustawiony jako " + cloudPort.ToString() + " \n");
+                        SetText("Port chmury ustawiony jako " + cloudPort.ToString() + " \n");
                     } else {
-                        log.AppendText("Błąd podczas ustawiania portu chmury (zły format?)" + " \n");
+                        SetText("Błąd podczas ustawiania portu chmury (zły format?)" + " \n");
                     }
 
                     cloudSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -150,8 +158,8 @@ namespace Nodix {
                         sendThread.Start();
                     } catch {
                         isConnectedToCloud = false;
-                        log.AppendText("Błąd podczas łączenia się z chmurą\n");
-                        log.AppendText("Złe IP lub port? Chmura nie działa?\n");
+                        SetText("Błąd podczas łączenia się z chmurą\n");
+                        SetText("Złe IP lub port? Chmura nie działa?\n");
                     }
                 } else SetText("Węzeł jest już połączony z chmurą\n");
             } else SetText("Ustal numer węzła!\n");
@@ -876,7 +884,8 @@ namespace Nodix {
             while (parent.isConnectedToManager) {
                 try {
                     if (sendLoginT) {
-                        write.WriteLine("LOGINT\n" + parent.myAddress.ToString());
+                        //write.WriteLine("LOGINT\n" + parent.myAddress.ToString());
+                        write.WriteLine("LOGINT\n" + parent.myAddress.network*100+parent.myAddress.subnet*10+parent.myAddress.host);
                         write.Flush();
                         sendLoginT = false;
                     }

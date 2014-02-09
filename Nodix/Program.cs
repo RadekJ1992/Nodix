@@ -19,6 +19,7 @@ namespace Nodix {
                 try {
                     nNumber = args[0];
                     n.readConfig(nNumber);
+                    n.connect = true;
                 } catch {}
             }
             Application.Run(n);
