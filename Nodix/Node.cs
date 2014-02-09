@@ -697,7 +697,7 @@ namespace Nodix {
                         controlSendThread = new Thread(this.controlSender);
                         controlSendThread.IsBackground = true;
                         controlSendThread.Start();
-                        conToCloudButton.Text = "Rozłącz";
+                        //conToCloudButton.Text = "Rozłącz";
                         LRM = new eLReMix(this);
                         SetText("Połączono!\n");
                         exceptionCount = 0;
