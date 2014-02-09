@@ -258,8 +258,9 @@ namespace Nodix
         }
 
 
-        private void _CzyZyje(Tuple<Address, int> argus)//pod dany adres (jaqk istnieje) wysyłamy ATMPacket z wiadomością ZYJESZ
+        private void _CzyZyje(Object argg)//pod dany adres (jaqk istnieje) wysyłamy ATMPacket z wiadomością ZYJESZ
         {
+            Tuple<Address, int> argus = (Tuple<Address, int>)argg;
             bool wolne = false;
             int port=0;
             Address sprawdzany = argus.Item1;
